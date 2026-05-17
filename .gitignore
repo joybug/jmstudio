@@ -1,0 +1,17 @@
+# PyInstaller Build & Standalone Folders (Ignore compiled binary and massive caches)
+build/
+dist/
+*.spec
+
+# Python temporary caches
+__pycache__/
+*.pyc
+*.pyo
+
+# Local database configuration (Keep user personal library paths private)
+md_viewer_config.json
+
+# IDE settings
+.vscode/
+.idea/
+.gemini/
