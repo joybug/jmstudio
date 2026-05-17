@@ -44,7 +44,7 @@ rem Step 4: Push to Main Branch
 echo.
 echo [Step 4] Pushing to GitHub (https://github.com/joyfoxg/jmstudio)...
 git branch -M main
-git push -u origin main
+git push -u origin main --force
 if %errorlevel% neq 0 (
     echo.
     echo [ERROR] Push failed!
