@@ -50,7 +50,7 @@
 
 Joy Markdown Studio는 파이썬 백엔드 데스크톱 셸과 모던 웹 프론트엔드가 하이브리드로 결합된 강력한 구조를 취하고 있습니다.
 
-```mermaid
+```{mermaid}
 graph TD
     subgraph Python Backend
         A[jmstudio.py Main Entry] --> B[PyWebView Shell]
