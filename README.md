@@ -61,12 +61,13 @@ Joy Markdown Studio는 파이썬 백엔드 데스크톱 셸과 모던 웹 프론
 
 ```{mermaid}
 graph TD
-    subgraph Python Backend
+    subgraph backend ["Python Backend"]
         A[jmstudio.py Main Entry] --> B[PyWebView Shell]
         A --> C[Bottle Local Server]
         A --> D[Pillow Icon Builder]
     end
-    subgraph UI / Front-end (Local Server & API Bridge)
+    
+    subgraph frontend ["UI / Front-end (Local Server & API Bridge)"]
         B <-->|JS API Bridge| E[HTML/Vanilla CSS/JS Client]
         C -->|Serves Resources & Workspace Files| E
         E --> F[Marked.js Markdown Parser]
@@ -75,7 +76,8 @@ graph TD
         E --> I[SmilesDrawer Molecular Graphics]
         E --> J[Mermaid.js Diagrammer]
     end
-    subgraph Cloud APIs
+    
+    subgraph cloud ["Cloud APIs"]
         E -->|GET API Request| K[PubChem PUG REST API]
     end
 ```
