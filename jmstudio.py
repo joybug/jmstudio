@@ -173,31 +173,19 @@ class MdViewerApi:
                 file_types=('Markdown Documents (*.md;*.qmd;*.markdown;*.txt)', 'All files (*.*)')
             )
             if file_paths:
-                copied_count = 0
-                new_rel_paths = []
+                added_count = 0
+                new_paths = []
                 for path in file_paths:
                     if os.path.exists(path) and os.path.isfile(path):
-                        filename = os.path.basename(path)
-                        dest_path = os.path.join(self.workspace, filename)
+                        # 절대 경로 포맷 표준화 (백슬래시 -> 슬래시)
+                        norm_path = os.path.abspath(path).replace('\\', '/')
+                        new_paths.append(norm_path)
+                        added_count += 1
                         
-                        # 파일 이름 충돌 방지: 동일 파일명이 있으면 'filename (1).md' 형식으로 고유 명칭 부여
-                        name, ext = os.path.splitext(filename)
-                        counter = 1
-                        while os.path.exists(dest_path):
-                            dest_path = os.path.join(self.workspace, f"{name} ({counter}){ext}")
-                            counter += 1
-                            
-                        shutil.copy2(path, dest_path)
-                        copied_count += 1
-                        
-                        # 상대 경로를 서재 목록 데이터베이스에 등록
-                        rel_path = os.path.relpath(dest_path, self.workspace).replace('\\', '/')
-                        new_rel_paths.append(rel_path)
-                        
-                if copied_count > 0:
+                if added_count > 0:
                     cfg = get_config()
                     added_docs = cfg.get("added_documents", [])
-                    for p in new_rel_paths:
+                    for p in new_paths:
                         if p not in added_docs:
                             added_docs.append(p)
                     cfg["added_documents"] = added_docs
@@ -205,7 +193,7 @@ class MdViewerApi:
                     
                     return {
                         "status": "success",
-                        "message": f"{copied_count}개의 문서가 내 서재에 성공적으로 추가되었습니다.",
+                        "message": f"{added_count}개의 문서가 원래 위치 그대로 서재에 추가되었습니다.",
                         "files": self.list_files()
                     }
             return {"status": "cancel"}
@@ -215,7 +203,7 @@ class MdViewerApi:
     def list_files(self):
         cfg = get_config()
         if "added_documents" not in cfg:
-            # 최초 업그레이드 기동 시, 기존의 마크다운 파일(예: 가이드라인 등)을 유실 없이 서재 기본 파일로 이식
+            # 최초 업그레이드 기동 시
             initial_docs = []
             try:
                 for item in sorted(os.listdir(self.workspace)):
@@ -230,13 +218,17 @@ class MdViewerApi:
             
         added_docs = cfg.get("added_documents", [])
         
-        # 실제 물리 디스크에 존재하는지 검사 및 누락 파일 자동 제거
+        # 실제 물리 디스크에 존재하는지 검사 및 누락 파일 자동 제거 (상대/절대 경로 통합)
         valid_docs = []
         changed = False
-        for rel_path in added_docs:
-            full_path = os.path.join(self.workspace, rel_path)
+        for path in added_docs:
+            if os.path.isabs(path):
+                full_path = path
+            else:
+                full_path = os.path.join(self.workspace, path)
+                
             if os.path.exists(full_path) and os.path.isfile(full_path):
-                valid_docs.append(rel_path)
+                valid_docs.append(path)
             else:
                 changed = True
                 
@@ -244,7 +236,23 @@ class MdViewerApi:
             cfg["added_documents"] = valid_docs
             save_config(cfg)
             
-        return self._build_tree_from_paths(valid_docs)
+        # 상대 경로 트리와 절대 경로 외부 파일 트리 분할 빌드 후 병합
+        relative_paths = [p for p in valid_docs if not os.path.isabs(p)]
+        tree = self._build_tree_from_paths(relative_paths)
+        
+        # 외부 파일 추가
+        for p in sorted(valid_docs):
+            if os.path.isabs(p):
+                filename = os.path.basename(p)
+                size = os.path.getsize(p) if os.path.exists(p) else 0
+                tree.append({
+                    "name": f"📄 {filename}",
+                    "type": "file",
+                    "path": p,
+                    "size": size,
+                    "is_external": True
+                })
+        return tree
 
     def _build_tree_from_paths(self, paths):
         root = {}
@@ -295,9 +303,12 @@ class MdViewerApi:
         return convert(root)
 
     def read_file(self, rel_path):
-        full_path = os.path.abspath(os.path.join(self.workspace, rel_path))
-        if not full_path.startswith(self.workspace):
-            return {"status": "error", "message": "Access denied"}
+        if os.path.isabs(rel_path):
+            full_path = os.path.abspath(rel_path)
+        else:
+            full_path = os.path.abspath(os.path.join(self.workspace, rel_path))
+            if not full_path.startswith(self.workspace):
+                return {"status": "error", "message": "Access denied"}
         try:
             with open(full_path, "r", encoding="utf-8") as f:
                 content = f.read()
@@ -312,9 +323,12 @@ class MdViewerApi:
             return {"status": "error", "message": str(e)}
 
     def save_file(self, rel_path, content):
-        full_path = os.path.abspath(os.path.join(self.workspace, rel_path))
-        if not full_path.startswith(self.workspace):
-            return {"status": "error", "message": "Access denied"}
+        if os.path.isabs(rel_path):
+            full_path = os.path.abspath(rel_path)
+        else:
+            full_path = os.path.abspath(os.path.join(self.workspace, rel_path))
+            if not full_path.startswith(self.workspace):
+                return {"status": "error", "message": "Access denied"}
         try:
             # 부모 디렉토리가 없으면 생성
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
