@@ -103,6 +103,7 @@ e:\jm_studio\
     ├── chemistry_encyclopedia.md # 주요 화합물의 백과사전식 SMILES 데이터베이스
     ├── computer_science_guide.md # 전산/컴퓨터 공학용 마크다운, 다이어그램, 복잡도 수식 가이드
     ├── math_science_guide.md     # KaTeX 수식 및 수학/물리/화학 기호 작성 안내서
+    ├── geometry_guide.md         # 이공계 기하 도형 및 물리 다이어그램 작도 가이드 (신규)
     ├── markdown_guide.md         # 기본적인 마크다운 문법 및 스타일 가이드
     ├── mermaid_guide.md          # Mermaid 다이어그램 및 시각화 작성 안내서
     └── flowchart_guide.md        # 순서도 및 차트 작성 세부 가이드
