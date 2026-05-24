@@ -131,11 +131,12 @@ e:\jm_studio\
    ```
    * 실행 시, `app_icon.png`가 존재할 경우 자동으로 고품질 다중 해상도(16x16 ~ 256x256) 아이콘 파일인 `app_icon.ico`로 변환하여 윈도우 타이틀바와 하단 작업표시줄에 완벽하게 바인딩합니다.
 
-### 📦 단독 실행 파일(.exe)로 배포하기 (Compilation)
-외부 다른 PC에서 별도의 Python이나 라이브러리를 설치하지 않고 **Joy Markdown Studio**를 즉시 실행할 수 있는 독립 실행 파일로 컴파일하는 방법입니다.
+### 📦 단독 실행 파일로 배포하기 (Compilation)
+외부 다른 PC에서 별도의 Python이나 라이브러리를 설치하지 않고 **Joy Markdown Studio**를 즉시 실행할 수 있는 독립 패키지(실행 파일)로 컴파일하는 방법입니다.
 
+#### 🪟 Windows 환경에서 빌드 (.exe)
 1. **원클릭 컴파일 스크립트 실행**:
-   * 폴더 내에 생성된 [compile.bat](file:///e:/jm_studio/compile.bat) 파일을 **더블 클릭**하여 실행하거나 터미널 환경에 맞춰 다음 명령을 수행합니다.
+   * 폴더 내에 생성된 [compile.bat](file:///c:/Workspace/jmstudio/compile.bat) 파일을 **더블 클릭**하여 실행하거나 터미널 환경에 맞춰 다음 명령을 수행합니다.
      * **PowerShell (기본 터미널)**:
        ```powershell
        .\compile.bat
@@ -144,12 +145,29 @@ e:\jm_studio\
        ```cmd
        compile.bat
        ```
-   * 이 스크립트는 내부적으로 `PyInstaller`를 자동 설치/업데이트한 뒤 `jmstudio.py`를 단일 EXE로 빌드합니다.
+   * 이 스크립트는 내부적으로 `PyInstaller`를 자동 설치/업데이트한 뒤 `jmstudio.py`를 버전이 포함된 단일 EXE 파일(`JoyMarkdownStudio-vX.XX.exe`)로 빌드합니다.
 
 2. **실행 파일 복사 및 배포**:
-   * 컴파일이 성공적으로 종료되면 `e:\jm_studio\dist\` 폴더가 생성됩니다.
-   * `dist` 폴더 안에 빌드된 **`JoyMarkdownStudio.exe`** 파일만 복사하여 다른 Windows PC로 가져가면 더블클릭만으로 언제 어디서든 바로 구동됩니다.
+   * 컴파일이 성공적으로 종료되면 `.\dist\` 폴더가 생성됩니다.
+   * `dist` 폴더 안에 빌드된 **`JoyMarkdownStudio-vX.XX.exe`** 파일만 복사하여 다른 Windows PC로 가져가면 더블클릭만으로 언제 어디서든 바로 구동됩니다.
    * *참고: 무겁고 복잡한 디펜던시가 단일 실행 파일에 정밀 압축되어 담기므로, 최초 기동 시 압축 해제를 위해 약간의 로딩(3~5초)이 필요할 수 있습니다.*
+
+#### 🍎 macOS 환경에서 빌드 (.app)
+> [!IMPORTANT]
+> PyInstaller는 크로스 컴파일(Cross-compilation)을 지원하지 않습니다. macOS 용 앱 패키지를 만들려면 **반드시 macOS 컴퓨터 환경에서 빌드를 수행**해야 합니다. (Windows에서는 Mac 용 실행 파일을 만들 수 없습니다.)
+
+1. **Mac 터미널에서 컴파일 스크립트 실행**:
+   * 소스코드 폴더를 Mac PC로 복사한 후, Mac 터미널을 열고 해당 폴더로 이동합니다.
+   * 아래 명령어를 차례로 입력하여 빌드 스크립트 [compile.sh](file:///c:/Workspace/jmstudio/compile.sh)에 실행 권한을 부여하고 실행합니다:
+     ```bash
+     chmod +x compile.sh
+     ./compile.sh
+     ```
+   * 스크립트가 필요한 라이브러리를 설치한 뒤 `dist/` 폴더 내에 단독 실행 가능한 macOS 앱 번들인 **`JoyMarkdownStudio-vX.XX.app`** 폴더를 생성합니다.
+
+2. **앱 패키지 배포**:
+   * 생성된 `JoyMarkdownStudio-vX.XX.app` 폴더를 **우클릭하여 압축(Zip)**한 후 배포합니다.
+   * *참고: Apple Developer 계정으로 정식 서명된 앱이 아니므로, 다른 Mac 기기에서 처음 실행할 때는 **마우스 우클릭 -> 열기(Open)**를 선택하고 열기 버튼을 클릭하여 Gatekeeper 보안 경고를 우회해 주어야 구동됩니다.*
 
 ---
 
