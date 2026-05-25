@@ -31,7 +31,7 @@ def save_config(config):
 
 # 설정 로드 및 환경변수 지정
 config = get_config()
-APP_NAME = "Joy Markdown Studio v3.7.3"
+APP_NAME = "Joy Markdown Studio v3.7.4"
 PORT = int(config.get("port", 58220))
 BIND_IP = config.get("bind_ip", "0.0.0.0")
 
@@ -633,7 +633,7 @@ HTML_CONTENT = """<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Joy Markdown Studio v3.7.3</title>
+    <title>Joy Markdown Studio v3.7.4</title>
     <!-- 외부 라이브러리 CDN 로드 -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
@@ -4839,6 +4839,16 @@ def main():
     
             
     # PNG를 ICO 형식으로 자동 변환 (다중 사이즈 포함)
+            
+    # 웹뷰가 열리기 전에 로컬 서버(Bottle)가 포트를 열고 준비될 때까지 대기
+    import socket
+    import time
+    for _ in range(50):
+        try:
+            with socket.create_connection(("127.0.0.1", PORT), timeout=0.1):
+                break
+        except OSError:
+            time.sleep(0.1)
             
     # 웹뷰 창 로드
     window = webview.create_window(
