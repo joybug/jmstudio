@@ -93,6 +93,7 @@ graph TD
 ```
 e:\jm_studio\
 ├── jmstudio.py                  # 메인 실행 파일 (백엔드 서버 및 GUI 셸, 프론트 HTML 소스 포함)
+├── JoyMarkdownStudio.spec       # PyInstaller 빌드 스펙 파일
 ├── compile.bat                  # Windows 단독 실행 파일(.exe) 자동 컴파일용 배치 스크립트 (가상환경 지원)
 ├── compile.sh                   # macOS 단독 실행 앱(.app) 자동 컴파일용 쉘 스크립트 (가상환경 지원)
 ├── git_push.bat                 # 원격 깃허브 저장소(jmstudio) 자동 push 배치 스크립트
@@ -101,34 +102,25 @@ e:\jm_studio\
 ├── app_icon.png                 # 스튜디오 런처 로고 이미지
 ├── app_icon.ico                 # 윈도우 OS 창 프레임 및 시스템 트레이 바인딩용 다중 사이즈 아이콘
 ├── document.md                  # 샘플 마크다운 임시 저장소
-├── README_kr.md                 # 한국어 도움말 문서 (신규)
-├── doc/                         # 학술 및 렌더링 내장 가이드 문서 백업 폴더 (신규)
-│   ├── chemical_formula_guide_kr.md
-│   ├── chemical_formula_guide_en.md
-│   ├── chemistry_encyclopedia_kr.md
-│   ├── chemistry_encyclopedia_en.md
-│   ├── computer_science_guide_kr.md
-│   ├── computer_science_guide_en.md
-│   ├── math_science_guide_kr.md
-│   ├── math_science_guide_en.md
-│   ├── geometry_guide_kr.md
-│   ├── geometry_guide_en.md
-│   ├── markdown_guide_kr.md
-│   ├── markdown_guide_en.md
-│   ├── mermaid_guide_kr.md
-│   ├── mermaid_guide_en.md
-│   ├── flowchart_guide_kr.md
-│   └── flowchart_guide_en.md
-│
-└── [학술 및 렌더링 내장 가이드 문서 (영문판)]
-    ├── chemical_formula_guide.md # 화학 분자식 (SMILES) 렌더링 및 사용 가이드 (영문)
-    ├── chemistry_encyclopedia.md # 주요 화합물의 백과사전식 SMILES 데이터베이스 (영문)
-    ├── computer_science_guide.md # 전산/컴퓨터 공학용 마크다운, 다이어그램, 복잡도 수식 가이드 (영문)
-    ├── math_science_guide.md     # KaTeX 수식 및 수학/물리/화학 기호 작성 안내서 (영문)
-    ├── geometry_guide.md         # 이공계 기하 도형 및 물리 다이어그램 작도 가이드 (영문)
-    ├── markdown_guide.md         # 기본적인 마크다운 문법 및 스타일 가이드 (영문)
-    ├── mermaid_guide.md          # Mermaid 다이어그램 및 시각화 작성 안내서 (영문)
-    └── flowchart_guide.md        # 순서도 및 차트 작성 세부 가이드 (영문)
+├── README.md                    # 영문 도움말 문서
+├── README_kr.md                 # 한국어 도움말 문서 (이 파일)
+└── doc/                         # 학술 및 렌더링 가이드 문서 폴더 (한국어/영문: _kr, _en 접미사)
+    ├── chemical_formula_guide_kr.md        # 화학 분자식 (SMILES) 렌더링 및 사용 가이드 (한국어)
+    ├── chemical_formula_guide_en.md        # 화학 분자식 (SMILES) 렌더링 및 사용 가이드 (영문)
+    ├── chemistry_encyclopedia_kr.md        # 주요 화합물의 백과사전식 SMILES 데이터베이스 (한국어)
+    ├── chemistry_encyclopedia_en.md        # 주요 화합물의 백과사전식 SMILES 데이터베이스 (영문)
+    ├── computer_science_guide_kr.md        # 전산/컴퓨터 공학용 마크다운 및 수식 가이드 (한국어)
+    ├── computer_science_guide_en.md        # 전산/컴퓨터 공학용 마크다운 및 수식 가이드 (영문)
+    ├── flowchart_guide_kr.md               # 순서도 및 차트 작성 세부 가이드 (한국어)
+    ├── flowchart_guide_en.md               # 순서도 및 차트 작성 세부 가이드 (영문)
+    ├── geometry_guide_kr.md                # 이공계 기하 도형 및 물리 다이어그램 작도 가이드 (한국어)
+    ├── geometry_guide_en.md                # 이공계 기하 도형 및 물리 다이어그램 작도 가이드 (영문)
+    ├── markdown_guide_kr.md                # 기본적인 마크다운 문법 및 스타일 가이드 (한국어)
+    ├── markdown_guide_en.md                # 기본적인 마크다운 문법 및 스타일 가이드 (영문)
+    ├── math_science_guide_kr.md            # KaTeX 수식 및 수학/물리 기호 작성 안내서 (한국어)
+    ├── math_science_guide_en.md            # KaTeX 수식 및 수학/물리 기호 작성 안내서 (영문)
+    ├── mermaid_guide_kr.md                 # Mermaid 다이어그램 및 시각화 작성 안내서 (한국어)
+    └── mermaid_guide_en.md                 # Mermaid 다이어그램 및 시각화 작성 안내서 (영문)
 ```
 
 ---

@@ -104,22 +104,22 @@ e:\jm_studio\
 ├── README.md                    # English help document (this file)
 ├── README_kr.md                 # Korean help document
 └── doc/                         # Academic and rendering guide documents folder (KR/EN)
-    ├── chemical_formula_guide_kr.md
-    ├── chemical_formula_guide_en.md
-    ├── chemistry_encyclopedia_kr.md
-    ├── chemistry_encyclopedia_en.md
-    ├── computer_science_guide_kr.md
-    ├── computer_science_guide_en.md
-    ├── math_science_guide_kr.md
-    ├── math_science_guide_en.md
-    ├── geometry_guide_kr.md
-    ├── geometry_guide_en.md
-    ├── markdown_guide_kr.md
-    ├── markdown_guide_en.md
-    ├── mermaid_guide_kr.md
-    ├── mermaid_guide_en.md
-    ├── flowchart_guide_kr.md
-    └── flowchart_guide_en.md
+    ├── chemical_formula_guide_kr.md        # Chemical formula (SMILES) rendering guide (Korean)
+    ├── chemical_formula_guide_en.md        # Chemical formula (SMILES) rendering guide (English)
+    ├── chemistry_encyclopedia_kr.md        # Chemical encyclopedia and SMILES database (Korean)
+    ├── chemistry_encyclopedia_en.md        # Chemical encyclopedia and SMILES database (English)
+    ├── computer_science_guide_kr.md        # Computer science diagram and math guide (Korean)
+    ├── computer_science_guide_en.md        # Computer science diagram and math guide (English)
+    ├── flowchart_guide_kr.md               # Flowchart and chart creation guide (Korean)
+    ├── flowchart_guide_en.md               # Flowchart and chart creation guide (English)
+    ├── geometry_guide_kr.md                # Geometry and physics diagram guide (Korean)
+    ├── geometry_guide_en.md                # Geometry and physics diagram guide (English)
+    ├── markdown_guide_kr.md                # Basic markdown syntax and style guide (Korean)
+    ├── markdown_guide_en.md                # Basic markdown syntax and style guide (English)
+    ├── math_science_guide_kr.md            # KaTeX math & science formula guide (Korean)
+    ├── math_science_guide_en.md            # KaTeX math & science formula guide (English)
+    ├── mermaid_guide_kr.md                 # Mermaid diagram visualization guide (Korean)
+    └── mermaid_guide_en.md                 # Mermaid diagram visualization guide (English)
 ```
 
 ---
