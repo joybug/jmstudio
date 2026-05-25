@@ -43,6 +43,7 @@ if "last_workspace" in config and os.path.exists(config["last_workspace"]):
     active_workspace = os.path.abspath(config["last_workspace"])
 
 # API 인스턴스 전역 바인딩
+window = None
 api = None
 
 def get_local_ip():
@@ -4817,6 +4818,7 @@ HTML_CONTENT = """<!DOCTYPE html>
 """
 
 def main():
+    global window
     api = MdViewerApi()
     
     # Bottle 로컬 서버 백그라운드 구동 (상대 경로 리소스/이미지 서빙용)
