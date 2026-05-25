@@ -480,6 +480,36 @@ class MdViewerApi:
         save_config(cfg)
         return {"status": "success"}
 
+    def get_graph_data(self):
+        import os, re
+        nodes = []
+        links = []
+        node_ids = set()
+        ws = active_workspace
+        for root, dirs, files in os.walk(ws):
+            dirs[:] = [d for d in dirs if not d.startswith('.') and d not in ['venv', 'env', '__pycache__', 'node_modules']]
+            for file in files:
+                if file.lower().endswith('.md'):
+                    rel_path = os.path.relpath(os.path.join(root, file), ws).replace('\\', '/')
+                    node_id = file[:-3]
+                    nodes.append({"id": node_id, "name": file, "path": rel_path})
+                    node_ids.add(node_id)
+                    try:
+                        with open(os.path.join(root, file), 'r', encoding='utf-8') as f:
+                            content = f.read()
+                            matches = re.findall(r'\[\[(.*?)\]\]', content)
+                            for m in matches:
+                                target = m.split('|')[0].strip()
+                                if target.lower().endswith('.md'): target = target[:-3]
+                                links.append({"source": node_id, "target": target})
+                    except:
+                        pass
+        for link in links:
+            if link['target'] not in node_ids:
+                nodes.append({"id": link['target'], "name": link['target']+".md", "path": "", "missing": True})
+                node_ids.add(link['target'])
+        return {"nodes": nodes, "links": links}
+
     def save_lang(self, lang):
         cfg = get_config()
         cfg["lang"] = lang
@@ -644,6 +674,7 @@ HTML_CONTENT = """<!DOCTYPE html>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
     <script src="https://unpkg.com/smiles-drawer@2.0.1/dist/smiles-drawer.min.js"></script>
+    <script src="https://unpkg.com/force-graph"></script>
     <script type="module">
         import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs';
         window.mermaid = mermaid;
@@ -2218,6 +2249,10 @@ HTML_CONTENT = """<!DOCTYPE html>
                 <i data-lucide="eye" style="width: 14px; height: 14px;"></i>
                 <span data-i18n="mode_preview">미리보기</span>
             </button>
+            <button class="mode-btn" id="mode-graph" onclick="toggleGraphView()" style="color: #a855f7;">
+                <i data-lucide="share-2" style="width: 14px; height: 14px;"></i>
+                <span data-i18n="mode_graph">Graph</span>
+            </button>
         </div>
 
         <!-- 액션 그룹 -->
@@ -3257,7 +3292,77 @@ HTML_CONTENT = """<!DOCTYPE html>
         }, 500);
             }
             
-            // Drag and drop setup
+            // Graph View & Wiki Link
+        let isGraphViewOpen = false;
+        let myGraph = null;
+        
+        async function openWikiLink(targetName) {
+            const response = await fetch(`http://${window.BOTTLE_HOST || '127.0.0.1'}:${window.BOTTLE_PORT}/api/graph_data`);
+            const gData = await response.json();
+            const node = gData.nodes.find(n => n.id.toLowerCase() === targetName.toLowerCase());
+            
+            if (node && !node.missing) {
+                if (isGraphViewOpen) toggleGraphView();
+                openFile(node.path);
+            } else {
+                const create = confirm(`"${targetName}" 문서가 없습니다. 새로 만드시겠습니까?`);
+                if (create) {
+                    if (isGraphViewOpen) toggleGraphView();
+                    const newPath = targetName + '.md';
+                    await pywebview.api.save_file(newPath, `# ${targetName}\n\n`);
+                    const treeData = await pywebview.api.list_files();
+                    renderFileTree(treeData);
+                    openFile(newPath);
+                }
+            }
+        }
+        
+        async function toggleGraphView() {
+            isGraphViewOpen = !isGraphViewOpen;
+            const container = document.getElementById('graph-view-container');
+            const btn = document.getElementById('mode-graph');
+            
+            if (isGraphViewOpen) {
+                container.style.display = 'block';
+                if(btn) btn.classList.add('active');
+                
+                const response = await fetch(`http://${window.BOTTLE_HOST || '127.0.0.1'}:${window.BOTTLE_PORT}/api/graph_data`);
+                const gData = await response.json();
+                
+                if (!myGraph) {
+                    myGraph = ForceGraph()(container)
+                        .graphData(gData)
+                        .nodeId('id')
+                        .nodeLabel(node => {
+                            return `<div style="background: rgba(0,0,0,0.8); padding: 4px 8px; border-radius: 4px; color: white; border: 1px solid #a855f7;">${node.id}</div>`;
+                        })
+                        .nodeAutoColorBy('id')
+                        .nodeRelSize(6)
+                        .linkDirectionalArrowLength(3.5)
+                        .linkDirectionalArrowRelPos(1)
+                        .onNodeClick(node => {
+                            if (node.path) {
+                                toggleGraphView();
+                                openFile(node.path);
+                            } else {
+                                openWikiLink(node.id);
+                            }
+                        });
+                        
+                    const resizeObserver = new ResizeObserver(() => {
+                        myGraph.width(container.clientWidth).height(container.clientHeight);
+                    });
+                    resizeObserver.observe(container);
+                } else {
+                    myGraph.graphData(gData);
+                }
+            } else {
+                container.style.display = 'none';
+                if(btn) btn.classList.remove('active');
+            }
+        }
+        
+        // Drag and drop setup
             setupDragAndDrop();
         });
 
