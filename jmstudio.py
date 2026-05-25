@@ -31,7 +31,7 @@ def save_config(config):
 
 # 설정 로드 및 환경변수 지정
 config = get_config()
-APP_NAME = "Joy Markdown Studio v3.7.4"
+APP_NAME = "Joy Markdown Studio v3.7.5"
 PORT = int(config.get("port", 58220))
 BIND_IP = config.get("bind_ip", "0.0.0.0")
 
@@ -663,7 +663,7 @@ HTML_CONTENT = """<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Joy Markdown Studio v3.7.4</title>
+    <title>Joy Markdown Studio v3.7.5</title>
     <!-- 외부 라이브러리 CDN 로드 -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
@@ -674,7 +674,7 @@ HTML_CONTENT = """<!DOCTYPE html>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
     <script src="https://unpkg.com/smiles-drawer@2.0.1/dist/smiles-drawer.min.js"></script>
-    <script src="https://unpkg.com/force-graph"></script>
+    <!-- force-graph: 그래프 뷰 버튼 클릭 시 동적 로드 -->
     <script type="module">
         import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs';
         window.mermaid = mermaid;
@@ -2550,6 +2550,148 @@ HTML_CONTENT = """<!DOCTYPE html>
                     </div>
                 </div>
             </div>
+            <!-- 지식 그래프 뷰 컨테이너 -->
+            <div id="graph-view-container" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:var(--bg-app); z-index:9999;">
+                <!-- 실제 그래프 캔버스가 그려질 엘리먼트 (이것을 ForceGraph에 넘겨줌) -->
+                <div id="graph-canvas" style="width: 100%; height: 100%;"></div>
+                
+                <!-- 슬라이더 스위치 CSS 스타일 -->
+                <style>
+                    .graph-switch {
+                        position: relative;
+                        display: inline-block;
+                        width: 36px;
+                        height: 20px;
+                    }
+                    .graph-switch input { 
+                        opacity: 0;
+                        width: 0;
+                        height: 0;
+                    }
+                    .graph-slider-switch {
+                        position: absolute;
+                        cursor: pointer;
+                        top: 0; left: 0; right: 0; bottom: 0;
+                        background-color: rgba(255, 255, 255, 0.2);
+                        transition: .3s;
+                        border-radius: 20px;
+                    }
+                    .graph-slider-switch:before {
+                        position: absolute;
+                        content: "";
+                        height: 14px;
+                        width: 14px;
+                        left: 3px;
+                        bottom: 3px;
+                        background-color: white;
+                        transition: .3s;
+                        border-radius: 50%;
+                    }
+                    input:checked + .graph-slider-switch {
+                        background-color: #a855f7;
+                    }
+                    input:checked + .graph-slider-switch:before {
+                        transform: translateX(16px);
+                    }
+                </style>
+
+                <!-- 좌측 설정 패널 -->
+                <div id="graph-settings-panel" style="position: absolute; top: 20px; left: 20px; z-index: 10000; width: 260px; background: rgba(15, 17, 26, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 18px; color: #fff; font-family: sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.5); user-select: none;">
+                    <h3 style="margin-top:0; margin-bottom: 15px; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-weight: 600;">
+                        <span>그래프 설정</span>
+                        <i data-lucide="sliders" style="width: 15px; height: 15px; opacity: 0.7;"></i>
+                    </h3>
+                    
+                    <!-- 보기 섹션 -->
+                    <div>
+                        <!-- 화살표 표시 -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span style="font-size: 12px; opacity: 0.9;">화살표 표시</span>
+                            <label class="graph-switch">
+                                <input type="checkbox" id="graph-arrow-toggle" checked onchange="updateGraphDesign()">
+                                <span class="graph-slider-switch"></span>
+                            </label>
+                        </div>
+                        
+                        <!-- 파티클 애니메이션 -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span style="font-size: 12px; opacity: 0.9;">파티클 애니메이션</span>
+                            <label class="graph-switch">
+                                <input type="checkbox" id="graph-particle-toggle" checked onchange="updateGraphDesign()">
+                                <span class="graph-slider-switch"></span>
+                            </label>
+                        </div>
+                        
+                        <!-- 선 길이 -->
+                        <div style="margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; opacity: 0.8;">
+                                <span>선 길이</span>
+                                <span id="val-link-distance">120px</span>
+                            </div>
+                            <input type="range" id="graph-link-distance" min="60" max="240" value="120" style="width: 100%; accent-color: #a855f7;" oninput="updateGraphDesign()">
+                        </div>
+                        
+                        <!-- 선 두께 -->
+                        <div style="margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; opacity: 0.8;">
+                                <span>선 두께</span>
+                                <span id="val-link-width">2.0px</span>
+                            </div>
+                            <input type="range" id="graph-link-width" min="0.5" max="5.0" step="0.5" value="2.0" style="width: 100%; accent-color: #a855f7;" oninput="updateGraphDesign()">
+                        </div>
+
+                        <!-- 선 색상 -->
+                        <div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 12px; opacity: 0.9;">선 색상</span>
+                            <input type="color" id="graph-link-color" value="#a855f7" style="border: none; border-radius: 4px; width: 44px; height: 24px; padding: 0; background: none; cursor: pointer;" onchange="updateGraphDesign()">
+                        </div>
+                        
+                        <!-- 노드 크기 배율 -->
+                        <div style="margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; opacity: 0.8;">
+                                <span>노드 크기 배율</span>
+                                <span id="val-node-size">1.0x</span>
+                            </div>
+                            <input type="range" id="graph-node-size" min="0.5" max="2.5" step="0.1" value="1.0" style="width: 100%; accent-color: #a855f7;" oninput="updateGraphDesign()">
+                        </div>
+                        
+                        <!-- 글꼴 크기 -->
+                        <div style="margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; opacity: 0.8;">
+                                <span>글꼴 크기</span>
+                                <span id="val-font-size">12px</span>
+                            </div>
+                            <input type="range" id="graph-font-size" min="8" max="22" value="12" style="width: 100%; accent-color: #a855f7;" oninput="updateGraphDesign()">
+                        </div>
+
+                        <!-- 글꼴 색상 -->
+                        <div style="margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 12px; opacity: 0.9;">글꼴 색상</span>
+                            <input type="color" id="graph-font-color" value="#ffffff" style="border: none; border-radius: 4px; width: 44px; height: 24px; padding: 0; background: none; cursor: pointer;" onchange="updateGraphDesign()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 하단 줌 컨트롤바 -->
+                <div style="position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; align-items: center; background: rgba(15, 17, 26, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 30px; padding: 5px 14px; gap: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.4); user-select: none;">
+                    <button onclick="resetGraphZoom()" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'" title="화면에 맞춤">
+                        <i data-lucide="maximize" style="width: 16px; height: 16px;"></i>
+                    </button>
+                    
+                    <button onclick="zoomGraph('out')" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'" title="축소">
+                        <i data-lucide="minus" style="width: 16px; height: 16px;"></i>
+                    </button>
+                    
+                    <input type="range" id="graph-zoom-slider" min="0.1" max="4.0" step="0.05" value="1.0" style="width: 100px; accent-color: #a855f7; cursor: pointer;" oninput="onZoomSliderChange(this.value)">
+                    
+                    <button onclick="zoomGraph('in')" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'" title="확대">
+                        <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                    </button>
+                </div>
+
+                <!-- 우측 상단 닫기 버튼 -->
+                <button onclick="toggleGraphView()" style="position: absolute; top: 20px; right: 20px; z-index: 10000; background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: white; border-radius: 50%; width: 44px; height: 44px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 0 10px rgba(168,85,247,0.4); transition: all 0.2s;" onmouseover="this.style.background='rgba(168,85,247,0.4)'; this.style.boxShadow='0 0 15px rgba(168,85,247,0.6)'" onmouseout="this.style.background='rgba(168, 85, 247, 0.2)'; this.style.boxShadow='0 0 10px rgba(168,85,247,0.4)'">×</button>
+            </div>
         </div>
 
         <!-- 우측 TOC 플로팅 패널 -->
@@ -3295,29 +3437,99 @@ HTML_CONTENT = """<!DOCTYPE html>
             // Graph View & Wiki Link
         let isGraphViewOpen = false;
         let myGraph = null;
+        let forceGraphLoaded = false;
+        let graphDegrees = {};
         
-        async function openWikiLink(targetName) {
-            const response = await fetch(`http://${window.BOTTLE_HOST || '127.0.0.1'}:${window.BOTTLE_PORT}/api/graph_data`);
-            const gData = await response.json();
-            const node = gData.nodes.find(n => n.id.toLowerCase() === targetName.toLowerCase());
-            
-            if (node && !node.missing) {
-                if (isGraphViewOpen) toggleGraphView();
-                openFile(node.path);
-            } else {
-                const create = confirm(`"${targetName}" 문서가 없습니다. 새로 만드시겠습니까?`);
-                if (create) {
-                    if (isGraphViewOpen) toggleGraphView();
-                    const newPath = targetName + '.md';
-                    await pywebview.api.save_file(newPath, `# ${targetName}\n\n`);
-                    const treeData = await pywebview.api.list_files();
-                    renderFileTree(treeData);
-                    openFile(newPath);
-                }
-            }
+        function loadForceGraph() {
+            return new Promise((resolve, reject) => {
+                if (forceGraphLoaded || typeof ForceGraph !== 'undefined') { forceGraphLoaded = true; resolve(); return; }
+                const s = document.createElement('script');
+                s.src = 'https://unpkg.com/force-graph@1.43.5/dist/force-graph.min.js';
+                s.onload = () => { forceGraphLoaded = true; resolve(); };
+                s.onerror = () => reject(new Error('force-graph load failed'));
+                document.head.appendChild(s);
+            });
         }
         
-        async function toggleGraphView() {
+        window.openWikiLink = async function(targetName) {
+            try {
+                const gData = await pywebview.api.get_graph_data();
+                const node = gData.nodes.find(n => n.id.toLowerCase() === targetName.toLowerCase());
+                if (node && !node.missing) {
+                    if (isGraphViewOpen) window.toggleGraphView();
+                    openFile(node.path);
+                } else {
+                    const create = confirm('"' + targetName + '" - ' + t('msg_wiki_create_confirm'));
+                    if (create) {
+                        if (isGraphViewOpen) window.toggleGraphView();
+                        const newPath = targetName + '.md';
+                        await pywebview.api.save_file(newPath, '# ' + targetName);
+                        const treeData = await pywebview.api.list_files();
+                        renderFileTree(treeData);
+                        openFile(newPath);
+                    }
+                }
+            } catch(e) { console.error('openWikiLink error:', e); }
+        };
+        
+        window.updateGraphDesign = function() {
+            if (!myGraph) return;
+            
+            const showArrows = document.getElementById('graph-arrow-toggle').checked;
+            const showParticles = document.getElementById('graph-particle-toggle').checked;
+            const linkDistance = parseFloat(document.getElementById('graph-link-distance').value);
+            const linkWidthVal = parseFloat(document.getElementById('graph-link-width').value);
+            const linkColorVal = document.getElementById('graph-link-color').value;
+            const nodeSizeVal = parseFloat(document.getElementById('graph-node-size').value);
+            const fontSizeVal = parseFloat(document.getElementById('graph-font-size').value);
+            const fontColorVal = document.getElementById('graph-font-color').value;
+            
+            document.getElementById('val-link-distance').innerText = linkDistance + 'px';
+            document.getElementById('val-link-width').innerText = linkWidthVal.toFixed(1) + 'px';
+            document.getElementById('val-node-size').innerText = nodeSizeVal.toFixed(1) + 'x';
+            document.getElementById('val-font-size').innerText = fontSizeVal + 'px';
+            
+            // Apply forces
+            myGraph.d3Force('link').distance(linkDistance);
+            myGraph.d3Force('charge').strength(-linkDistance * 1.6);
+            
+            // Apply styles to links
+            myGraph
+                .linkDirectionalArrowLength(showArrows ? 4 : 0)
+                .linkWidth(linkWidthVal)
+                .linkColor(() => linkColorVal)
+                .linkDirectionalArrowColor(() => linkColorVal)
+                .linkDirectionalParticles(showParticles ? 2 : 0)
+                .linkDirectionalParticleWidth(linkWidthVal * 1.5)
+                .linkDirectionalParticleColor(() => '#f472b6');
+            
+            // Reheat simulation
+            myGraph.d3ReheatSimulation();
+        };
+
+        window.onZoomSliderChange = function(val) {
+            if (myGraph) {
+                myGraph.zoom(parseFloat(val));
+            }
+        };
+
+        window.zoomGraph = function(direction) {
+            if (myGraph) {
+                const currentZoom = myGraph.zoom();
+                const nextZoom = direction === 'in' ? currentZoom * 1.25 : currentZoom / 1.25;
+                myGraph.zoom(nextZoom, 200);
+                const slider = document.getElementById('graph-zoom-slider');
+                if (slider) slider.value = nextZoom;
+            }
+        };
+
+        window.resetGraphZoom = function() {
+            if (myGraph) {
+                myGraph.zoomToFit(400);
+            }
+        };
+        
+        window.toggleGraphView = async function() {
             isGraphViewOpen = !isGraphViewOpen;
             const container = document.getElementById('graph-view-container');
             const btn = document.getElementById('mode-graph');
@@ -3326,41 +3538,109 @@ HTML_CONTENT = """<!DOCTYPE html>
                 container.style.display = 'block';
                 if(btn) btn.classList.add('active');
                 
-                const response = await fetch(`http://${window.BOTTLE_HOST || '127.0.0.1'}:${window.BOTTLE_PORT}/api/graph_data`);
-                const gData = await response.json();
-                
-                if (!myGraph) {
-                    myGraph = ForceGraph()(container)
-                        .graphData(gData)
-                        .nodeId('id')
-                        .nodeLabel(node => {
-                            return `<div style="background: rgba(0,0,0,0.8); padding: 4px 8px; border-radius: 4px; color: white; border: 1px solid #a855f7;">${node.id}</div>`;
-                        })
-                        .nodeAutoColorBy('id')
-                        .nodeRelSize(6)
-                        .linkDirectionalArrowLength(3.5)
-                        .linkDirectionalArrowRelPos(1)
-                        .onNodeClick(node => {
-                            if (node.path) {
-                                toggleGraphView();
-                                openFile(node.path);
-                            } else {
-                                openWikiLink(node.id);
-                            }
-                        });
-                        
-                    const resizeObserver = new ResizeObserver(() => {
-                        myGraph.width(container.clientWidth).height(container.clientHeight);
+                try {
+                    await loadForceGraph();
+                    const gData = await pywebview.api.get_graph_data();
+                    
+                    // Reset and calculate degrees (number of links connected to each node)
+                    graphDegrees = {};
+                    gData.nodes.forEach(n => graphDegrees[n.id] = 0);
+                    gData.links.forEach(l => {
+                        const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+                        const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+                        if (graphDegrees[sourceId] !== undefined) graphDegrees[sourceId]++;
+                        if (graphDegrees[targetId] !== undefined) graphDegrees[targetId]++;
                     });
-                    resizeObserver.observe(container);
-                } else {
-                    myGraph.graphData(gData);
+                    
+                    if (!myGraph) {
+                        const canvasEl = document.getElementById('graph-canvas');
+                        myGraph = ForceGraph()(canvasEl)
+                            .graphData(gData)
+                            .nodeId('id')
+                            .backgroundColor('#090a0f')
+                            .nodeCanvasObject((node, ctx, globalScale) => {
+                                const label = node.id;
+                                const degree = graphDegrees[node.id] || 0;
+                                
+                                // Read live configuration values from Settings Panel
+                                const nodeSizeVal = parseFloat(document.getElementById('graph-node-size').value);
+                                const fontSizeVal = parseFloat(document.getElementById('graph-font-size').value);
+                                const fontColorVal = document.getElementById('graph-font-color').value;
+                                
+                                // Dynamic radius based on degrees scaled by the slider!
+                                const baseRadius = 5 + Math.min(degree, 8) * 1.5;
+                                const radius = baseRadius * nodeSizeVal;
+                                
+                                // Color logic based on rules:
+                                let color = '#a855f7';
+                                if (node.missing) {
+                                    color = '#ef4444';
+                                } else if (degree >= 5) {
+                                    color = '#fbbf24';
+                                } else if (node.path) {
+                                    if (node.path.startsWith('doc/')) {
+                                        color = '#0ea5e9';
+                                    } else if (node.path.startsWith('docs/')) {
+                                        color = '#10b981';
+                                    }
+                                }
+                                
+                                const fontSize = (degree >= 5 ? fontSizeVal + 1 : fontSizeVal - 1) / globalScale;
+                                ctx.font = `${fontSize}px sans-serif`;
+                                
+                                // Node circle with glow effect
+                                ctx.beginPath();
+                                ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
+                                ctx.fillStyle = color;
+                                ctx.shadowBlur = degree >= 5 ? 15 : 8;
+                                ctx.shadowColor = color;
+                                ctx.fill();
+                                ctx.shadowBlur = 0; // reset
+                                
+                                // Text label below
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+                                ctx.fillStyle = fontColorVal;
+                                ctx.fillText(label, node.x, node.y + radius + 11);
+                            })
+                            .onNodeClick(node => {
+                                if (node.path) {
+                                    window.toggleGraphView();
+                                    openFile(node.path);
+                                } else {
+                                    window.openWikiLink(node.id);
+                                }
+                            })
+                            .onZoom(zoomObj => {
+                                const slider = document.getElementById('graph-zoom-slider');
+                                if (slider) {
+                                    slider.value = zoomObj.k;
+                                }
+                            });
+                        
+                        // Initialize graph design and forces from sliders
+                        window.updateGraphDesign();
+                        
+                        const resizeObserver = new ResizeObserver(() => {
+                            myGraph.width(canvasEl.clientWidth).height(canvasEl.clientHeight);
+                        });
+                        resizeObserver.observe(canvasEl);
+                    } else {
+                        myGraph.graphData(gData);
+                        window.updateGraphDesign();
+                    }
+                } catch(e) {
+                    console.error('Graph view error:', e);
+                    alert('Graph library load failed: ' + e.message);
+                    isGraphViewOpen = false;
+                    container.style.display = 'none';
+                    if(btn) btn.classList.remove('active');
                 }
             } else {
                 container.style.display = 'none';
                 if(btn) btn.classList.remove('active');
             }
-        }
+        };
         
         // Drag and drop setup
             setupDragAndDrop();
@@ -3640,8 +3920,24 @@ HTML_CONTENT = """<!DOCTYPE html>
                 // 2. 콜아웃 (Quarto 및 Github 스타일) 변환
                 const calloutParsed = parseCallouts(maskedText);
                 
+                // 2.5 Wiki link [[name]] or [[name|display]] conversion
+                let wikiLinked = "";
+                let wIdx = 0;
+                while (wIdx < calloutParsed.length) {
+                    const openBr = calloutParsed.indexOf("[[", wIdx);
+                    if (openBr === -1) { wikiLinked += calloutParsed.slice(wIdx); break; }
+                    const closeBr = calloutParsed.indexOf("]]", openBr + 2);
+                    if (closeBr === -1) { wikiLinked += calloutParsed.slice(wIdx); break; }
+                    wikiLinked += calloutParsed.slice(wIdx, openBr);
+                    const inner = calloutParsed.slice(openBr + 2, closeBr);
+                    let target = inner, display = inner;
+                    if (inner.indexOf("|") !== -1) { const pp = inner.split("|"); target = pp[0].trim(); display = pp[1].trim(); }
+                    wikiLinked += '<a href="#" class="wiki-link" data-target="' + target + '">' + display + '</a>';
+                    wIdx = closeBr + 2;
+                }
+
                 // 3. Marked 기본 마크다운 컴파일
-                let renderedHtml = marked.parse(calloutParsed);
+                let renderedHtml = marked.parse(wikiLinked);
                 
                 // 4. 로컬 워크스페이스 이미지 경로 수정
                 renderedHtml = resolveImagePaths(renderedHtml);
@@ -3652,6 +3948,14 @@ HTML_CONTENT = """<!DOCTYPE html>
                 // 6. DOM 뷰 적용
                 const container = document.getElementById('preview-content');
                 container.innerHTML = renderedHtml;
+                
+                // 6.5 위키 링크 클릭 이벤트 바인딩
+                container.querySelectorAll('.wiki-link').forEach(el => {
+                    el.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        if (window.openWikiLink) window.openWikiLink(this.getAttribute('data-target'));
+                    });
+                });
                 
                 // Quarto 스타일의 클래스 명 보정 (예: language-{mermaid} -> language-mermaid)
                 container.querySelectorAll('pre code').forEach(codeEl => {
