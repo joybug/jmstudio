@@ -2613,14 +2613,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                             </label>
                         </div>
                         
-                        <!-- 파티클 애니메이션 -->
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <span style="font-size: 12px; opacity: 0.9;">파티클 애니메이션</span>
-                            <label class="graph-switch">
-                                <input type="checkbox" id="graph-particle-toggle" checked onchange="updateGraphDesign()">
-                                <span class="graph-slider-switch"></span>
-                            </label>
-                        </div>
+
                         
                         <!-- 선 길이 -->
                         <div style="margin-bottom: 12px;">
@@ -2628,7 +2621,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                                 <span>선 길이</span>
                                 <span id="val-link-distance">120px</span>
                             </div>
-                            <input type="range" id="graph-link-distance" min="60" max="240" value="120" style="width: 100%; accent-color: #a855f7;" oninput="updateGraphDesign()">
+                            <input type="range" id="graph-link-distance" min="60" max="240" value="120" style="width: 100%; accent-color: #a855f7;" oninput="updateGraphDesign(true)">
                         </div>
                         
                         <!-- 선 두께 -->
@@ -3472,11 +3465,10 @@ HTML_CONTENT = """<!DOCTYPE html>
             } catch(e) { console.error('openWikiLink error:', e); }
         };
         
-        window.updateGraphDesign = function() {
+        window.updateGraphDesign = function(reheat = false) {
             if (!myGraph) return;
             
             const showArrows = document.getElementById('graph-arrow-toggle').checked;
-            const showParticles = document.getElementById('graph-particle-toggle').checked;
             const linkDistance = parseFloat(document.getElementById('graph-link-distance').value);
             const linkWidthVal = parseFloat(document.getElementById('graph-link-width').value);
             const linkColorVal = document.getElementById('graph-link-color').value;
@@ -3489,22 +3481,20 @@ HTML_CONTENT = """<!DOCTYPE html>
             document.getElementById('val-node-size').innerText = nodeSizeVal.toFixed(1) + 'x';
             document.getElementById('val-font-size').innerText = fontSizeVal + 'px';
             
-            // Apply forces
-            myGraph.d3Force('link').distance(linkDistance);
-            myGraph.d3Force('charge').strength(-linkDistance * 1.6);
-            
-            // Apply styles to links
+            // Apply styles to links dynamically
             myGraph
-                .linkDirectionalArrowLength(showArrows ? 4 : 0)
+                .linkDirectionalArrowLength(showArrows ? 5 : 0)
                 .linkWidth(linkWidthVal)
                 .linkColor(() => linkColorVal)
                 .linkDirectionalArrowColor(() => linkColorVal)
-                .linkDirectionalParticles(showParticles ? 2 : 0)
-                .linkDirectionalParticleWidth(linkWidthVal * 1.5)
-                .linkDirectionalParticleColor(() => '#f472b6');
+                .linkDirectionalParticles(0); // 파티클 애니메이션 기능 삭제
             
-            // Reheat simulation
-            myGraph.d3ReheatSimulation();
+            // 물리엔진 적용 및 리히트는 명시적으로 reheat가 true일 때(선 길이 슬라이더 조작 시)만 수행하여 점들이 사방으로 계속 벌어지는 현상 방지
+            if (reheat) {
+                myGraph.d3Force('link').distance(linkDistance);
+                myGraph.d3Force('charge').strength(-linkDistance * 1.6);
+                myGraph.d3ReheatSimulation();
+            }
         };
 
         window.onZoomSliderChange = function(val) {
