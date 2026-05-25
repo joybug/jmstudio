@@ -134,13 +134,25 @@ class MdViewerApi:
         self.workspace = active_workspace
 
     def get_initial_state(self):
+        files_tree = self.list_files()
         cfg = get_config()
+        valid_docs = cfg.get("added_documents", [])
+        
+        last_file = cfg.get("last_file", "")
+        if last_file:
+            norm_last_file = os.path.normpath(last_file).replace('\\', '/').lower()
+            norm_valid_docs = {os.path.normpath(p).replace('\\', '/').lower() for p in valid_docs}
+            if norm_last_file not in norm_valid_docs:
+                last_file = ""
+                cfg["last_file"] = ""
+                save_config(cfg)
+                
         return {
             "workspace": self.workspace,
             "theme": cfg.get("theme", "dark"),
             "lang": cfg.get("lang", "ko"),
-            "last_file": cfg.get("last_file", ""),
-            "files": self.list_files(),
+            "last_file": last_file,
+            "files": files_tree,
             "port": cfg.get("port", PORT),
             "bind_ip": cfg.get("bind_ip", BIND_IP),
             "access_password": cfg.get("access_password", ""),
@@ -370,6 +382,15 @@ class MdViewerApi:
             added_docs = cfg.get("added_documents", [])
             added_docs = [p for p in added_docs if p != rel_path and not p.startswith(rel_path + "/")]
             cfg["added_documents"] = added_docs
+            
+            # last_file이 삭제되는 항목이거나 그 하위에 있는 경우 지워줍니다.
+            last_file = cfg.get("last_file", "")
+            if last_file:
+                norm_last = os.path.normpath(last_file).replace('\\', '/').lower()
+                norm_rel = os.path.normpath(rel_path).replace('\\', '/').lower()
+                if norm_last == norm_rel or norm_last.startswith(norm_rel + "/"):
+                    cfg["last_file"] = ""
+                    
             save_config(cfg)
             return {"status": "success", "files": self.list_files()}
         except Exception as e:
@@ -485,30 +506,73 @@ class MdViewerApi:
         nodes = []
         links = []
         node_ids = set()
-        ws = active_workspace
-        for root, dirs, files in os.walk(ws):
-            dirs[:] = [d for d in dirs if not d.startswith('.') and d not in ['venv', 'env', '__pycache__', 'node_modules']]
-            for file in files:
-                if file.lower().endswith('.md'):
-                    rel_path = os.path.relpath(os.path.join(root, file), ws).replace('\\', '/')
-                    node_id = file[:-3]
-                    nodes.append({"id": node_id, "name": file, "path": rel_path})
+        ws = self.workspace
+        
+        cfg = get_config()
+        added_docs = cfg.get("added_documents", [])
+        saved_positions = cfg.get("graph_node_positions", {})
+        
+        for path in added_docs:
+            if os.path.isabs(path):
+                full_path = path
+            else:
+                full_path = os.path.join(ws, path)
+                
+            if os.path.exists(full_path) and os.path.isfile(full_path):
+                filename = os.path.basename(path)
+                filename_lower = filename.lower()
+                if filename_lower.endswith(('.md', '.qmd', '.markdown', '.txt')):
+                    node_id = os.path.splitext(filename)[0]
+                    node_data = {"id": node_id, "name": filename, "path": path}
+                    
+                    if node_id in saved_positions:
+                        pos = saved_positions[node_id]
+                        if pos:
+                            node_data["fx"] = pos.get("fx")
+                            node_data["fy"] = pos.get("fy")
+                            
+                    nodes.append(node_data)
                     node_ids.add(node_id)
                     try:
-                        with open(os.path.join(root, file), 'r', encoding='utf-8') as f:
+                        with open(full_path, 'r', encoding='utf-8') as f:
                             content = f.read()
                             matches = re.findall(r'\[\[(.*?)\]\]', content)
                             for m in matches:
                                 target = m.split('|')[0].strip()
-                                if target.lower().endswith('.md'): target = target[:-3]
+                                target_lower = target.lower()
+                                if target_lower.endswith('.markdown'):
+                                    target = target[:-9]
+                                elif target_lower.endswith('.qmd'):
+                                    target = target[:-4]
+                                elif target_lower.endswith('.txt'):
+                                    target = target[:-4]
+                                elif target_lower.endswith('.md'):
+                                    target = target[:-3]
                                 links.append({"source": node_id, "target": target})
                     except:
                         pass
+                        
         for link in links:
             if link['target'] not in node_ids:
-                nodes.append({"id": link['target'], "name": link['target']+".md", "path": "", "missing": True})
+                node_data = {"id": link['target'], "name": link['target'] + ".md", "path": "", "missing": True}
+                if link['target'] in saved_positions:
+                    pos = saved_positions[link['target']]
+                    if pos:
+                        node_data["fx"] = pos.get("fx")
+                        node_data["fy"] = pos.get("fy")
+                nodes.append(node_data)
                 node_ids.add(link['target'])
+                
         return {"nodes": nodes, "links": links}
+
+    def save_graph_node_positions(self, positions):
+        try:
+            cfg = get_config()
+            cfg["graph_node_positions"] = positions
+            save_config(cfg)
+            return {"status": "success"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
 
     def save_lang(self, lang):
         cfg = get_config()
@@ -3598,6 +3662,17 @@ HTML_CONTENT = """<!DOCTYPE html>
                 myGraph.zoomToFit(400);
             }
         };
+
+        window.saveGraphPositions = async function() {
+            if (!myGraph) return;
+            const positions = {};
+            myGraph.graphData().nodes.forEach(node => {
+                if (node.fx !== undefined && node.fx !== null && node.fy !== undefined && node.fy !== null) {
+                    positions[node.id] = { fx: node.fx, fy: node.fy };
+                }
+            });
+            await pywebview.api.save_graph_node_positions(positions);
+        };
         
         window.toggleGraphView = async function() {
             isGraphViewOpen = !isGraphViewOpen;
@@ -3689,10 +3764,12 @@ HTML_CONTENT = """<!DOCTYPE html>
                             .onNodeDragEnd(node => {
                                 node.fx = node.x;
                                 node.fy = node.y;
+                                window.saveGraphPositions();
                             })
                             .onNodeRightClick(node => {
                                 node.fx = null;
                                 node.fy = null;
+                                window.saveGraphPositions();
                             })
                             .onZoom(zoomObj => {
                                 const slider = document.getElementById('graph-zoom-slider');
@@ -5194,7 +5271,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                 const res = await pywebview.api.delete_item(relPath);
                 if (res.status === 'success') {
                     renderFileTree(res.files);
-                    if (currentFilePath === relPath) {
+                    if (currentFilePath === relPath || currentFilePath.startsWith(relPath + "/")) {
                         currentFilePath = "";
                         document.getElementById('active-file-title').innerText = t('msg_no_active_file');
                         document.getElementById('editor').value = "";
