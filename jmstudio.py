@@ -31,7 +31,7 @@ def save_config(config):
 
 # 설정 로드 및 환경변수 지정
 config = get_config()
-APP_NAME = "Joy Markdown Studio v3.7.8"
+APP_NAME = "Joy Markdown Studio v3.7.9"
 PORT = int(config.get("port", 58220))
 BIND_IP = config.get("bind_ip", "0.0.0.0")
 
@@ -751,7 +751,7 @@ HTML_CONTENT = """<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Joy Markdown Studio v3.7.8</title>
+    <title>Joy Markdown Studio v3.7.9</title>
     <!-- 외부 라이브러리 CDN 로드 -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
@@ -2412,20 +2412,24 @@ HTML_CONTENT = """<!DOCTYPE html>
             <div style="font-size: 1.2em; font-weight: 600;" data-i18n="msg_drag_drop_desc">여기에 마크다운 파일을 드롭하여 즉시 열기</div>
         </div>
 
-        <!-- 사이드바 (내 서재 + 수식 입력기) -->
+        <!-- 사이드바 (내 서재 + 수식 입력기 + 화학식 검색 + 다이어그램) -->
         <div class="sidebar" id="sidebar-panel" style="display: flex; flex-direction: column;">
             <div class="sidebar-tabs" style="display: flex; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.15);">
-                <button class="sidebar-tab-btn active" id="tab-explorer" onclick="setSidebarTab('explorer')" style="flex: 1; padding: 12px; background: transparent; border: none; border-bottom: 2px solid var(--accent); color: var(--text-main); font-family: 'Outfit', sans-serif; font-size: 0.8em; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
-                    <i data-lucide="folder" style="width: 14px; height: 14px;"></i>
+                <button class="sidebar-tab-btn active" id="tab-explorer" onclick="setSidebarTab('explorer')" style="flex: 1; padding: 12px 6px; background: transparent; border: none; border-bottom: 2px solid var(--accent); color: var(--text-main); font-family: 'Outfit', sans-serif; font-size: 0.76em; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s;">
+                    <i data-lucide="folder" style="width: 13px; height: 13px;"></i>
                     <span data-i18n="tab_explorer">내 서재</span>
                 </button>
-                <button class="sidebar-tab-btn" id="tab-math" onclick="setSidebarTab('math')" style="flex: 1; padding: 12px; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 0.8em; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
-                    <i data-lucide="calculator" style="width: 14px; height: 14px;"></i>
+                <button class="sidebar-tab-btn" id="tab-math" onclick="setSidebarTab('math')" style="flex: 1; padding: 12px 6px; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 0.76em; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s;">
+                    <i data-lucide="calculator" style="width: 13px; height: 13px;"></i>
                     <span data-i18n="tab_math">수식 입력기</span>
                 </button>
-                <button class="sidebar-tab-btn" id="tab-chemistry" onclick="setSidebarTab('chemistry')" style="flex: 1; padding: 12px; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 0.8em; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
-                    <i data-lucide="beaker" style="width: 14px; height: 14px;"></i>
+                <button class="sidebar-tab-btn" id="tab-chemistry" onclick="setSidebarTab('chemistry')" style="flex: 1; padding: 12px 6px; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 0.76em; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s;">
+                    <i data-lucide="beaker" style="width: 13px; height: 13px;"></i>
                     <span data-i18n="tab_chemistry">화학식 검색</span>
+                </button>
+                <button class="sidebar-tab-btn" id="tab-diagram" onclick="setSidebarTab('diagram')" style="flex: 1; padding: 12px 6px; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 0.76em; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s;">
+                    <i data-lucide="network" style="width: 13px; height: 13px;"></i>
+                    <span data-i18n="tab_diagram">다이어그램</span>
                 </button>
             </div>
             
@@ -2447,6 +2451,79 @@ HTML_CONTENT = """<!DOCTYPE html>
                 </div>
                 <!-- 트리 뷰 목록 -->
                 <div class="file-tree" id="file-tree-container"></div>
+            </div>
+            
+            <!-- 다이어그램 입력기 패널 -->
+            <div class="sidebar-content-pane" id="sidebar-content-diagram" style="display: none; flex-direction: column; flex: 1; overflow-y: auto; padding: 16px; gap: 12px;">
+                <div class="sidebar-header" style="padding: 0 0 8px 0; border-bottom: 1px solid var(--border); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+                    <span class="sidebar-title" data-i18n="sidebar_title_diagram">다이어그램 & 마인드맵 도우미</span>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="math-section">
+                        <div class="math-section-title" data-i18n="diagram_title_mindmap">마인드맵 & 조직도</div>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertDiagramTemplate('mindmap')" style="text-align: center;">
+                                <i data-lucide="brain" style="width: 18px; height: 18px; color: var(--accent); margin-bottom: 2px;"></i>
+                                <span style="font-weight: 600; font-size: 0.8em; color: var(--text-main);">마인드맵</span>
+                                <span style="font-size: 0.64em; color: var(--text-muted);">생각 구조화 / 브레인스토밍</span>
+                            </button>
+                            <button class="math-item" onclick="insertDiagramTemplate('orgchart')" style="text-align: center;">
+                                <i data-lucide="git-pull-request" style="width: 18px; height: 18px; color: var(--accent); margin-bottom: 2px;"></i>
+                                <span style="font-weight: 600; font-size: 0.8em; color: var(--text-main);">조직도 (UML)</span>
+                                <span style="font-size: 0.64em; color: var(--text-muted);">계층형 트리 / 조직 구조</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="math-section">
+                        <div class="math-section-title" data-i18n="diagram_title_flow">흐름도 & 상태도</div>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertDiagramTemplate('flowchart')" style="text-align: center;">
+                                <i data-lucide="git-commit" style="width: 18px; height: 18px; color: var(--accent); margin-bottom: 2px;"></i>
+                                <span style="font-weight: 600; font-size: 0.8em; color: var(--text-main);">플로우차트</span>
+                                <span style="font-size: 0.64em; color: var(--text-muted);">알고리즘 및 작업 순서도</span>
+                            </button>
+                            <button class="math-item" onclick="insertDiagramTemplate('state')" style="text-align: center;">
+                                <i data-lucide="refresh-cw" style="width: 18px; height: 18px; color: var(--accent); margin-bottom: 2px;"></i>
+                                <span style="font-weight: 600; font-size: 0.8em; color: var(--text-main);">상태도</span>
+                                <span style="font-size: 0.64em; color: var(--text-muted);">시스템 상태 전이 모델링</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="math-section">
+                        <div class="math-section-title" data-i18n="diagram_title_structure">프로젝트 & 클래스 설계</div>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertDiagramTemplate('sequence')" style="text-align: center;">
+                                <i data-lucide="arrow-left-right" style="width: 18px; height: 18px; color: var(--accent); margin-bottom: 2px;"></i>
+                                <span style="font-weight: 600; font-size: 0.8em; color: var(--text-main);">시퀀스도</span>
+                                <span style="font-size: 0.64em; color: var(--text-muted);">객체/서비스간 통신 흐름</span>
+                            </button>
+                            <button class="math-item" onclick="insertDiagramTemplate('class')" style="text-align: center;">
+                                <i data-lucide="layout" style="width: 18px; height: 18px; color: var(--accent); margin-bottom: 2px;"></i>
+                                <span style="font-weight: 600; font-size: 0.8em; color: var(--text-main);">클래스도</span>
+                                <span style="font-size: 0.64em; color: var(--text-muted);">UML 클래스 및 설계도</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="math-section">
+                        <div class="math-section-title" data-i18n="diagram_title_pm">일정 및 데이터 분석</div>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertDiagramTemplate('gantt')" style="text-align: center;">
+                                <i data-lucide="calendar" style="width: 18px; height: 18px; color: var(--accent); margin-bottom: 2px;"></i>
+                                <span style="font-weight: 600; font-size: 0.8em; color: var(--text-main);">간트 차트</span>
+                                <span style="font-size: 0.64em; color: var(--text-muted);">일정 로드맵 및 기한 관리</span>
+                            </button>
+                            <button class="math-item" onclick="insertDiagramTemplate('pie')" style="text-align: center;">
+                                <i data-lucide="pie-chart" style="width: 18px; height: 18px; color: var(--accent); margin-bottom: 2px;"></i>
+                                <span style="font-weight: 600; font-size: 0.8em; color: var(--text-main);">파이 차트</span>
+                                <span style="font-size: 0.64em; color: var(--text-muted);">데이터 비율 시각화</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <!-- 수식 입력기 패널 -->
@@ -3028,7 +3105,9 @@ HTML_CONTENT = """<!DOCTYPE html>
                 "tab_explorer": "내 서재",
                 "tab_math": "수식 입력기",
                 "tab_chemistry": "화학식 검색",
+                "tab_diagram": "다이어그램",
                 "sidebar_title_explorer": "내 서재",
+                "sidebar_title_diagram": "다이어그램 & 마인드맵 도우미",
                 "tooltip_create_file": "새 파일 생성",
                 "tooltip_create_folder": "새 폴더 생성",
                 "tooltip_refresh": "목록 새로고침",
@@ -3217,7 +3296,9 @@ HTML_CONTENT = """<!DOCTYPE html>
                 "tab_explorer": "My Library",
                 "tab_math": "Math Input",
                 "tab_chemistry": "Chem Search",
+                "tab_diagram": "Diagrams",
                 "sidebar_title_explorer": "My Library",
+                "sidebar_title_diagram": "Diagram & Mindmap Helper",
                 "tooltip_create_file": "Create File",
                 "tooltip_create_folder": "Create Folder",
                 "tooltip_refresh": "Refresh List",
@@ -4544,25 +4625,29 @@ HTML_CONTENT = """<!DOCTYPE html>
             }
         }
 
-        // 사이드바 수식 입력기 및 화학식 검색기 탭 전환 기능
+        // 사이드바 수식 입력기 및 화학식 검색기, 다이어그램 탭 전환 기능
         function setSidebarTab(tab) {
             const explorerPane = document.getElementById('sidebar-content-explorer');
             const mathPane = document.getElementById('sidebar-content-math');
             const chemistryPane = document.getElementById('sidebar-content-chemistry');
+            const diagramPane = document.getElementById('sidebar-content-diagram');
             
             const tabBtnExplorer = document.getElementById('tab-explorer');
             const tabBtnMath = document.getElementById('tab-math');
             const tabBtnChemistry = document.getElementById('tab-chemistry');
+            const tabBtnDiagram = document.getElementById('tab-diagram');
             
             // 모든 패널 숨김
             explorerPane.style.display = 'none';
             mathPane.style.display = 'none';
             if (chemistryPane) chemistryPane.style.display = 'none';
+            if (diagramPane) diagramPane.style.display = 'none';
             
             // 모든 탭 버튼 비활성화
             tabBtnExplorer.classList.remove('active');
             tabBtnMath.classList.remove('active');
             if (tabBtnChemistry) tabBtnChemistry.classList.remove('active');
+            if (tabBtnDiagram) tabBtnDiagram.classList.remove('active');
             
             tabBtnExplorer.style.borderBottom = '2px solid transparent';
             tabBtnExplorer.style.color = 'var(--text-muted)';
@@ -4571,6 +4656,10 @@ HTML_CONTENT = """<!DOCTYPE html>
             if (tabBtnChemistry) {
                 tabBtnChemistry.style.borderBottom = '2px solid transparent';
                 tabBtnChemistry.style.color = 'var(--text-muted)';
+            }
+            if (tabBtnDiagram) {
+                tabBtnDiagram.style.borderBottom = '2px solid transparent';
+                tabBtnDiagram.style.color = 'var(--text-muted)';
             }
             
             // 선택된 탭 활성화
@@ -4592,7 +4681,46 @@ HTML_CONTENT = """<!DOCTYPE html>
                     tabBtnChemistry.style.borderBottom = '2px solid var(--accent)';
                     tabBtnChemistry.style.color = 'var(--text-main)';
                 }
+            } else if (tab === 'diagram') {
+                if (diagramPane) diagramPane.style.display = 'flex';
+                if (tabBtnDiagram) {
+                    tabBtnDiagram.classList.add('active');
+                    tabBtnDiagram.style.borderBottom = '2px solid var(--accent)';
+                    tabBtnDiagram.style.color = 'var(--text-main)';
+                }
             }
+        }
+
+        // 다이어그램 템플릿 삽입 기능
+        function insertDiagramTemplate(type) {
+            let template = "";
+            switch (type) {
+                case 'mindmap':
+                    template = "```mermaid\nmindmap\n  root((?중심 토픽))\n    주제 1\n      세부내용 A\n      세부내용 B\n    주제 2\n      세부내용 C\n      세부내용 D\n```\n";
+                    break;
+                case 'orgchart':
+                    template = "```mermaid\nflowchart TD\n  CEO(?대표이사) --> 이사회\n  CEO --> 부사장\n  부사장 --> 개발본부\n  부사장 --> 마케팅본부\n  개발본부 --> 개발1팀\n  개발본부 --> 개발2팀\n```\n";
+                    break;
+                case 'flowchart':
+                    template = "```mermaid\nflowchart TD\n  Start(시작) --> Input(?데이터 입력)\n  Input --> Dec{조건 판단}\n  Dec -- Yes --> Process[작업 처리]\n  Dec -- No --> End(종료)\n  Process --> End\n```\n";
+                    break;
+                case 'state':
+                    template = "```mermaid\nstateDiagram-v2\n  [*] --> Idle\n  Idle --> Processing: ?작업 시작\n  Processing --> Success: 성공\n  Processing --> Failed: 실패\n  Success --> [*]\n  Failed --> Idle: 재시도\n```\n";
+                    break;
+                case 'sequence':
+                    template = "```mermaid\nsequenceDiagram\n  actor User as ?사용자\n  participant App as 클라이언트\n  participant Server as 서버\n\n  User->>App: 버튼 클릭\n  App->>Server: API 요청 (data)\n  Server-->>App: JSON 응답 (success)\n  App-->>User: 결과 화면 렌더링\n```\n";
+                    break;
+                case 'class':
+                    template = "```mermaid\nclassDiagram\n  class ?Animal {\n    +String name\n    +int age\n    +makeSound()\n  }\n  class Dog {\n    +String breed\n    +bark()\n  }\n  Animal <|-- Dog\n```\n";
+                    break;
+                case 'gantt':
+                    template = "```mermaid\ngantt\n  title ?프로젝트 개발 일정\n  dateFormat  YYYY-MM-DD\n  section 분석 및 설계\n  요구사항 분석           :a1, 2026-05-25, 5d\n  시스템 설계             :after a1  , 4d\n  section 구현 및 테스트\n  핵심 프론트엔드 개발     :active, b1, 2026-05-30, 8d\n  백엔드 API 연동         :b2, after b1  , 6d\n  통합 테스트             :c1, after b2  , 4d\n```\n";
+                    break;
+                case 'pie':
+                    template = "```mermaid\npie title ?시장 점유율 분석\n  \"A사\" : 42.5\n  \"B사\" : 31.8\n  \"C사\" : 15.2\n  \"기타\" : 10.5\n```\n";
+                    break;
+            }
+            insertMathSymbol(template);
         }
 
         function setMathSubTab(subtab) {
