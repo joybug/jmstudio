@@ -31,7 +31,7 @@ def save_config(config):
 
 # 설정 로드 및 환경변수 지정
 config = get_config()
-APP_NAME = "Joy Markdown Studio v3.7.6"
+APP_NAME = "Joy Markdown Studio v3.7.8"
 PORT = int(config.get("port", 58220))
 BIND_IP = config.get("bind_ip", "0.0.0.0")
 
@@ -516,6 +516,30 @@ class MdViewerApi:
         save_config(cfg)
         return {"status": "success"}
 
+    def save_graph_image(self, base64_data):
+        global window
+        try:
+            if ',' in base64_data:
+                base64_data = base64_data.split(',')[1]
+            import base64
+            img_bytes = base64.b64decode(base64_data)
+            
+            file_path = window.create_file_dialog(
+                webview.SAVE_DIALOG,
+                directory=self.workspace,
+                save_filename='zettelkasten_graph.png',
+                file_types=('PNG Image (*.png)', 'All files (*.*)')
+            )
+            if file_path:
+                if isinstance(file_path, (list, tuple)):
+                    file_path = file_path[0]
+                with open(file_path, 'wb') as f:
+                    f.write(img_bytes)
+                return {"status": "success"}
+            return {"status": "cancel"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
     def export_html(self, rel_path, html_body, title):
         # 마크다운 파일과 동일한 경로에 확장자만 html로 바꾸어 저장
         base_no_ext, _ = os.path.splitext(rel_path)
@@ -663,7 +687,7 @@ HTML_CONTENT = """<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Joy Markdown Studio v3.7.6</title>
+    <title>Joy Markdown Studio v3.7.8</title>
     <!-- 외부 라이브러리 CDN 로드 -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
@@ -2199,6 +2223,33 @@ HTML_CONTENT = """<!DOCTYPE html>
                 padding: 12px !important;
             }
             
+            /* 지식 그래프 활성화 시 그래프만 인쇄되도록 설정 */
+            body.graph-view-active #preview-pane,
+            body.graph-view-active #pane-editor,
+            body.graph-view-active #pane-resizer,
+            body.graph-view-active #pane-preview,
+            body.graph-view-active #sidebar-toc,
+            body.graph-view-active #sidebar-panel {
+                display: none !important;
+            }
+            
+            body.graph-view-active #graph-view-container {
+                display: block !important;
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                background: #ffffff !important;
+                z-index: 99999 !important;
+            }
+            
+            body.graph-view-active #graph-settings-panel,
+            body.graph-view-active #graph-zoom-bar,
+            body.graph-view-active #graph-view-container > button {
+                display: none !important;
+            }
+            
             /* 인쇄 페이지 여백 설정 */
             @page {
                 size: auto;
@@ -2613,7 +2664,14 @@ HTML_CONTENT = """<!DOCTYPE html>
                             </label>
                         </div>
                         
-
+                        <!-- 파티클 애니메이션 -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span style="font-size: 12px; opacity: 0.9;">파티클 애니메이션</span>
+                            <label class="graph-switch">
+                                <input type="checkbox" id="graph-particle-toggle" checked onchange="updateGraphDesign()">
+                                <span class="graph-slider-switch"></span>
+                            </label>
+                        </div>
                         
                         <!-- 선 길이 -->
                         <div style="margin-bottom: 12px;">
@@ -2666,7 +2724,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                 </div>
 
                 <!-- 하단 줌 컨트롤바 -->
-                <div style="position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; align-items: center; background: rgba(15, 17, 26, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 30px; padding: 5px 14px; gap: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.4); user-select: none;">
+                <div id="graph-zoom-bar" style="position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; align-items: center; background: rgba(15, 17, 26, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 30px; padding: 5px 14px; gap: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.4); user-select: none;">
                     <button onclick="resetGraphZoom()" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'" title="화면에 맞춤">
                         <i data-lucide="maximize" style="width: 16px; height: 16px;"></i>
                     </button>
@@ -2679,6 +2737,17 @@ HTML_CONTENT = """<!DOCTYPE html>
                     
                     <button onclick="zoomGraph('in')" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'" title="확대">
                         <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                    </button>
+                    
+                    <!-- 구분선 -->
+                    <div style="width: 1px; height: 16px; background: rgba(255,255,255,0.2); margin: 0 4px;"></div>
+                    
+                    <button onclick="exportGraphImage()" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'" title="이미지 저장">
+                        <i data-lucide="image" style="width: 16px; height: 16px;"></i>
+                    </button>
+                    
+                    <button onclick="printGraph()" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'" title="PDF 인쇄">
+                        <i data-lucide="printer" style="width: 16px; height: 16px;"></i>
                     </button>
                 </div>
 
@@ -3407,6 +3476,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                                 else if (prop === 'save_lang') { bodyData.lang = args[0]; }
                                 else if (prop === 'save_network_settings') { bodyData.bind_ip = args[0]; bodyData.port = args[1]; bodyData.access_password = args[2]; }
                                 else if (prop === 'export_html') { bodyData.rel_path = args[0]; bodyData.html_body = args[1]; bodyData.title = args[2]; }
+                                else if (prop === 'save_graph_image') { bodyData.base64_data = args[0]; }
                                 
                                 let headers = { 'Content-Type': 'application/json' };
                                 const savedPwd = localStorage.getItem('access_password');
@@ -3469,6 +3539,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             if (!myGraph) return;
             
             const showArrows = document.getElementById('graph-arrow-toggle').checked;
+            const showParticles = document.getElementById('graph-particle-toggle').checked;
             const linkDistance = parseFloat(document.getElementById('graph-link-distance').value);
             const linkWidthVal = parseFloat(document.getElementById('graph-link-width').value);
             const linkColorVal = document.getElementById('graph-link-color').value;
@@ -3487,12 +3558,21 @@ HTML_CONTENT = """<!DOCTYPE html>
                 .linkWidth(linkWidthVal)
                 .linkColor(() => linkColorVal)
                 .linkDirectionalArrowColor(() => linkColorVal)
-                .linkDirectionalParticles(0); // 파티클 애니메이션 기능 삭제
+                .linkDirectionalParticles(showParticles ? 2 : 0)
+                .linkDirectionalParticleWidth(linkWidthVal * 1.5)
+                .linkDirectionalParticleColor(() => '#f472b6');
             
-            // 물리엔진 적용 및 리히트는 명시적으로 reheat가 true일 때(선 길이 슬라이더 조작 시)만 수행하여 점들이 사방으로 계속 벌어지는 현상 방지
+            // 물리엔진의 힘 설정은 언제나 슬라이더 값과 동기화시킵니다.
+            myGraph.d3Force('link').distance(linkDistance);
+            
+            // charge의 반발력을 안정적으로 제한하고, distanceMax를 설정하여 멀어진 노드들이 서로 밀어내지 않게 합니다.
+            // 이렇게 하면 선 길이를 줄였을 때 링크(선)의 인장력이 노드들을 중앙으로 부드럽게 다시 당겨줍니다.
+            myGraph.d3Force('charge')
+                .strength(-100)
+                .distanceMax(linkDistance * 2.0);
+            
+            // 리히트(시뮬레이션 재가열)만 명시적으로 요청되었을 때 수행하여 불필요한 프레임 드랍 및 무한 쏠림 방지
             if (reheat) {
-                myGraph.d3Force('link').distance(linkDistance);
-                myGraph.d3Force('charge').strength(-linkDistance * 1.6);
                 myGraph.d3ReheatSimulation();
             }
         };
@@ -3521,6 +3601,7 @@ HTML_CONTENT = """<!DOCTYPE html>
         
         window.toggleGraphView = async function() {
             isGraphViewOpen = !isGraphViewOpen;
+            document.body.classList.toggle('graph-view-active', isGraphViewOpen);
             const container = document.getElementById('graph-view-container');
             const btn = document.getElementById('mode-graph');
             
@@ -3601,6 +3682,18 @@ HTML_CONTENT = """<!DOCTYPE html>
                                     window.openWikiLink(node.id);
                                 }
                             })
+                            .onNodeDrag((node, translate) => {
+                                node.fx = node.x;
+                                node.fy = node.y;
+                            })
+                            .onNodeDragEnd(node => {
+                                node.fx = node.x;
+                                node.fy = node.y;
+                            })
+                            .onNodeRightClick(node => {
+                                node.fx = null;
+                                node.fy = null;
+                            })
                             .onZoom(zoomObj => {
                                 const slider = document.getElementById('graph-zoom-slider');
                                 if (slider) {
@@ -3630,6 +3723,65 @@ HTML_CONTENT = """<!DOCTYPE html>
                 container.style.display = 'none';
                 if(btn) btn.classList.remove('active');
             }
+        };
+        
+        window.exportGraphImage = async function() {
+            try {
+                const canvas = document.querySelector('#graph-canvas canvas');
+                if (!canvas) {
+                    alert(t('msg_export_failed') + ': Canvas not found');
+                    return;
+                }
+                const dataUrl = canvas.toDataURL('image/png');
+                if (window.pywebview && !window.pywebview.is_browser_proxy) {
+                    const res = await pywebview.api.save_graph_image(dataUrl);
+                    if (res.status === 'success') {
+                        showToast(t('toast_default'));
+                    } else if (res.status === 'error') {
+                        alert(t('msg_export_failed') + ': ' + res.message);
+                    }
+                } else {
+                    const a = document.createElement('a');
+                    a.href = dataUrl;
+                    a.download = 'zettelkasten_graph.png';
+                    a.click();
+                    showToast(t('toast_default'));
+                }
+            } catch (e) {
+                alert(t('msg_export_failed') + ': ' + e.message);
+            }
+        };
+
+        window.printGraph = function() {
+            if (!myGraph) return;
+            
+            const originalBg = myGraph.backgroundColor();
+            
+            myGraph.backgroundColor('#ffffff');
+            
+            const fontColorInput = document.getElementById('graph-font-color');
+            const linkColorInput = document.getElementById('graph-link-color');
+            const originalFontColor = fontColorInput.value;
+            const originalLinkColor = linkColorInput.value;
+            
+            fontColorInput.value = '#000000';
+            linkColorInput.value = '#555555';
+            
+            window.updateGraphDesign();
+            myGraph.d3ReheatSimulation(); // Force canvas redraw with new colors
+            
+            setTimeout(() => {
+                window.print();
+                
+                setTimeout(() => {
+                    myGraph.backgroundColor(originalBg);
+                    fontColorInput.value = originalFontColor;
+                    linkColorInput.value = originalLinkColor;
+                    window.updateGraphDesign();
+                    myGraph.d3ReheatSimulation(); // Force restore redraw
+                    showToast(t('msg_print_success'));
+                }, 150);
+            }, 300); // Wait 300ms to render light theme
         };
         
         // Drag and drop setup
