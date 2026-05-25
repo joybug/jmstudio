@@ -4816,7 +4816,7 @@ HTML_CONTENT = """<!DOCTYPE html>
 </html>
 """
 
-if __name__ == "__main__":
+def main():
     api = MdViewerApi()
     
     # Bottle 로컬 서버 백그라운드 구동 (상대 경로 리소스/이미지 서빙용)
@@ -4856,3 +4856,6 @@ if __name__ == "__main__":
     
     # Windows System.Drawing.Icon은 오직 .ico 파일만 수용하므로 변환된 .ico 사용
     webview.start(icon=dest_ico if os.path.exists(dest_ico) else None)
+
+if __name__ == "__main__":
+    main()

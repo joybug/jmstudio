@@ -1,0 +1,33 @@
+from setuptools import setup, find_packages
+
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
+
+setup(
+    name="joy-markdown-studio",
+    version="3.7.0",
+    author="Joy Fox",
+    author_email="joyfox@example.com",
+    description="The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/joyfoxg/jmstudio",
+    py_modules=["jmstudio"],
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+    ],
+    python_requires=">=3.10",
+    install_requires=[
+        "bottle>=0.12.25",
+        "pywebview>=4.4.1",
+        "Pillow>=10.0.0",
+    ],
+    entry_points={
+        "console_scripts": [
+            "jmstudio=jmstudio:main",
+        ],
+    },
+    include_package_data=True,
+)
