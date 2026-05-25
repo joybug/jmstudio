@@ -137,7 +137,14 @@ To run this application or build standalone packages, the following environment 
 
 ### 💻 Installation & Run
 
-#### Option 1: Global System Environment Setup
+#### Option 1: Official Installation via PyPI (Highly Recommended)
+If you have a Python environment, you can install and run the app from anywhere in the world with a single command.
+```bash
+pip install joy-markdown-studio
+jmstudio
+```
+
+#### Option 2: Global System Environment Source Code Run
 1. **Install required libraries**:
    ```bash
    pip install pywebview bottle Pillow

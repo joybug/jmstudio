@@ -138,7 +138,14 @@ e:\jm_studio\
 
 ### 💻 설치 및 실행 (Installation & Run)
 
-#### 방법 1: 일반 시스템 환경에서 실행 및 빌드 라이브러리 설치
+#### 방법 1: PyPI를 통한 공식 설치 (가장 추천)
+전 세계 어디서나 Python 환경만 있다면 명령어 한 줄로 설치 및 실행이 가능합니다.
+```bash
+pip install joy-markdown-studio
+jmstudio
+```
+
+#### 방법 2: 일반 시스템 환경 소스코드 실행
 1. **필수 라이브러리 설치**:
    ```bash
    pip install pywebview bottle Pillow
