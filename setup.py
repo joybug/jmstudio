@@ -7,7 +7,7 @@ setup(
     name="joy-markdown-studio",
     version="3.7.1",
     author="Joy Fox",
-    author_email="joyfox@example.com",
+    author_email="joyfoxg@gmail.com",
     description="The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio",
     long_description=long_description,
     long_description_content_type="text/markdown",
