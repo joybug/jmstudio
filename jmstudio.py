@@ -2284,6 +2284,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                 margin: 0 !important;
                 padding: 0 !important;
                 background: transparent !important;
+                zoom: 1 !important; /* 인쇄 시에는 화면상의 확대/축소 배율을 초기화하여 표준 A4 규격에 맞춤 */
             }
             
             .markdown-body {
@@ -2814,7 +2815,18 @@ HTML_CONTENT = """<!DOCTYPE html>
                         </button>
                         <span data-i18n="preview_live" style="margin-left: 4px;">실시간 미리보기</span>
                     </div>
-                    <span>Live Render</span>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 0.8em; opacity: 0.6; margin-right: 4px;">Live Render</span>
+                        <div style="display: flex; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; padding: 2px 4px; gap: 4px; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);">
+                            <button class="icon-btn-sm" onclick="zoomPreview(-0.1)" title="축소 (Zoom Out)" style="width: 22px; height: 22px; border: none; background: transparent;">
+                                <i data-lucide="zoom-out" style="width: 11px; height: 11px;"></i>
+                            </button>
+                            <span id="preview-zoom-level" onclick="resetPreviewZoom()" title="배율 초기화 (100%)" style="font-family: 'Outfit', sans-serif; font-size: 0.76em; font-weight: 600; cursor: pointer; color: var(--accent); min-width: 32px; text-align: center; user-select: none;">100%</span>
+                            <button class="icon-btn-sm" onclick="zoomPreview(0.1)" title="확대 (Zoom In)" style="width: 22px; height: 22px; border: none; background: transparent;">
+                                <i data-lucide="zoom-in" style="width: 11px; height: 11px;"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <div class="preview-pane" id="preview-pane">
                     <div class="markdown-body" id="preview-content">
@@ -4328,6 +4340,36 @@ HTML_CONTENT = """<!DOCTYPE html>
             const textarea = document.getElementById('editor');
             const gutter = document.getElementById('editor-gutter');
             gutter.scrollTop = textarea.scrollTop;
+        }
+
+        // 실시간 미리보기 배율 제어 (확대/축소)
+        let previewZoomLevel = 1.0;
+        
+        window.zoomPreview = function(amount) {
+            previewZoomLevel = Math.max(0.5, Math.min(2.5, previewZoomLevel + amount));
+            applyPreviewZoom();
+        };
+        
+        window.resetPreviewZoom = function() {
+            previewZoomLevel = 1.0;
+            applyPreviewZoom();
+        };
+        
+        function applyPreviewZoom() {
+            const content = document.getElementById('preview-content');
+            if (content) {
+                // Chromium 기반 Webview2에 완전히 최적화된 zoom 스타일 사용
+                content.style.zoom = previewZoomLevel;
+                
+                // 크로스 브라우저 호환성을 위한 백업 transform-origin 지정
+                content.style.transformOrigin = "top left";
+                
+                // 배율 UI 텍스트 갱신
+                const textEl = document.getElementById('preview-zoom-level');
+                if (textEl) {
+                    textEl.innerText = Math.round(previewZoomLevel * 100) + '%';
+                }
+            }
         }
 
         // 실시간 미리보기 렌더링 제어
