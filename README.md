@@ -1,4 +1,4 @@
-# 🧪 Joy Markdown Studio v3.8.1 🌟
+# 🧪 Joy Markdown Studio v3.8.5 🌟
 
 > **The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio**  
 > A premium desktop markdown creator application crafted with Python (`PyWebView` + `Bottle`) and modern Vanilla CSS/JS.
@@ -12,7 +12,11 @@
 
 ## ✨ Key Features
 
-### 1. 📐 Academic Math Helper (KaTeX Integration)
+### 1. 📝 CodeMirror 6 Editor Core Enhancement (v3.8.5 New)
+* **High-Speed Modern Editor Engine**: Replaced the standard textarea with the high-performance CodeMirror 6 engine. It provides a fast and stable typing environment even with massive markdown documents.
+* **Maximizing Coding Productivity**: Packed with essential coding assists such as auto-close brackets, robust undo/redo history, and custom shortcuts found in modern editors.
+
+### 2. 📐 Academic Math Helper (KaTeX Integration)
 * **Real-time Formula Rendering**: Equipped with a fast and accurate KaTeX engine to render inline math (`$...$`) and block math (`$$...$$`) seamlessly.
 * **Three Science & Engineering Tabbed Helper Panels**: 
   * **Math (📐)**: One-click insertion of fractions, roots, calculus, limits, Greek letters, and key symbols.
@@ -20,40 +24,40 @@
   * **Chemistry/Life Sciences (🧪)**: Supports templates for Arrhenius equation, ideal gas law, reaction arrows, DNA base pairs, and Gibbs free energy.
 * **Smart Cursor and Wildcards**: When inserting a formula template, the area to be edited (`?`) is automatically focused as a mouse selection, minimizing typing movement.
 
-### 2. 🧬 PubChem Real-time Chemical Molecular Structure Visualization
+### 3. 🧬 PubChem Real-time Chemical Molecular Structure Visualization
 * **PubChem API Integration**: When searching for chemical compound names in Korean or English (e.g., `아스피린`, `caffeine`, `capsaicin`), it retrieves molecular data and SMILES strings in real time from the US National Library of Medicine (NLM) PubChem database.
 * **2D Molecular Structure Preview**: Displays the 2D vector structural formula of the searched compound as real-time graphics inside the panel.
 * **SMILES Code Drawer**: When inserted into the editor as a ````smiles ```` code block, it is automatically visualized as a beautiful chemical skeletal structure model in the main preview area.
 * **Built-in Korean-English Mapping**: When searching for Korean compound names, it intelligently maps to the corresponding English term to query the API.
 
-### 3. 📊 Dynamic Diagrams (Mermaid.js)
+### 4. 📊 Dynamic Diagrams (Mermaid.js)
 * Instantly visualizes flowcharts, sequence diagrams, Gantt charts, mind maps, etc., directly from markdown text code.
 * **Mermaid Fullscreen & Zoom Mode**: Double-clicking a rendered diagram or clicking the icon opens it in a high-resolution fullscreen modal for detailed observation.
 
-### 4. 🗂️ Smart & Safe Library File Management
+### 5. 🗂️ Smart & Safe Library File Management
 * **Tree Explorer**: Displays the folder and file structure within the workspace in an elegant layout.
 * **User Data Protection (Safe Unregister)**: Deleting a document does not delete the physical disk file; it only unregisters it from the library database (`md_viewer_config.json`), preventing accidental loss of research source code or documents.
 * **Drag and Drop Support**: Dropping markdown files (`.md`, `.qmd`, `.txt`) from Windows Explorer onto the app screen loads them instantly with a visual guideline overlay.
 
-### 5. 🚀 Modern Design & Responsive UI
+### 6. 🚀 Modern Design & Responsive UI
 * **Glassmorphism & Neon Themes**: Supports smooth transitions between dark mode (default) and light mode, with an eye-friendly color palette and accent glowing effects.
 * **Sliding Hidden Panels**: Left explorer and right TOC (Table of Contents) panels slide cleanly to the screen edges, maximizing document writing space.
 * **Synchronized Scroll**: Highly synchronizes the scroll positions of the editor and preview areas to assist in reviewing long documents.
 
-### 6. 🌐 Standalone HTML Export
+### 7. 🌐 Standalone HTML Export
 * Exports the editing markdown as a completely standalone HTML file for external sharing.
 * The exported file preserves KaTeX equations, Prism syntax highlighting, Mermaid diagrams, and SMILES molecular models, rendering normally in any browser with an internet connection without needing a viewer.
 
-### 7. 🖨️ Premium Driverless PDF Printing
+### 8. 🖨️ Premium Driverless PDF Printing
 * **Custom Print of Preview Screen Only**: Clicking the PDF print button automatically removes unnecessary editor text areas, sidebars, headers, and other UI elements, outputting **only the markdown preview output formatted cleanly for A4 size**.
 * **Intelligent Ink Saving & Theme Switching**: Even if printing from dark mode, the document **temporarily auto-renders in a white/high-contrast theme for printing** to prevent wasting ink/toner and maximize readability, and returns to dark mode immediately after printing completes.
 
-### 8. 🌐 External Mobile Device Connection & Security Password Protection (v3.7.6 New)
+### 9. 🌐 External Mobile Device Connection & Security Password Protection
 * **Mobile and Tablet Remote Connection**: Supports multi-networking so you can access the workspace from other PCs or mobile devices on the same Wi-Fi/network. Enter the **Network Access URL (e.g., `http://192.168.x.x:58220`)** shown in the console to view your library wirelessly.
 * **Access Password Configuration**: You can set an access password via the **Settings icon (⚙️)** in the top right. When configured, a sleek and secure **Lock Screen** is activated for external network access.
 * **Custom Port & Host Binding**: Easily change the binding host (IP: `0.0.0.0` or `127.0.0.1`) and web service port number from the settings modal, which is saved permanently.
 
-### 9. 🌐 Bilingual UI Language Toggle (v3.7.6 New)
+### 10. 🌐 Bilingual UI Language Toggle
 * **Real-time UI Translation**: Switch the entire application interface (sidebar tabs, header buttons, labels, placeholders, tooltips, and dialog alerts) between Korean and English instantly via the **KR/EN** toggle button in the header.
 * **Settings Persistence**: The selected language is saved in real time to the local browser's `localStorage` and the `md_viewer_config.json` configuration file, automatically restoring the last state on startup.
 

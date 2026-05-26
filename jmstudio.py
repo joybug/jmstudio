@@ -31,7 +31,7 @@ def save_config(config):
 
 # 설정 로드 및 환경변수 지정
 config = get_config()
-APP_NAME = "Joy Markdown Studio v3.8.1"
+APP_NAME = "Joy Markdown Studio v3.8.5"
 PORT = int(config.get("port", 58220))
 BIND_IP = config.get("bind_ip", "0.0.0.0")
 
@@ -760,7 +760,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             alert("Unhandled Promise Rejection: " + event.reason + "\\nStack: " + (event.reason ? event.reason.stack : "N/A"));
         };
     </script>
-    <title>Joy Markdown Studio v3.8.1</title>
+    <title>Joy Markdown Studio v3.8.5</title>
     <!-- 외부 라이브러리 CDN 로드 -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
@@ -5897,7 +5897,7 @@ def main():
     )
     
     # Windows System.Drawing.Icon은 오직 .ico 파일만 수용하므로 변환된 .ico 사용
-    webview.start(icon=dest_ico if os.path.exists(dest_ico) else None, debug=True)
+    webview.start(icon=dest_ico if os.path.exists(dest_ico) else None, debug=False)
 
 if __name__ == "__main__":
     main()
