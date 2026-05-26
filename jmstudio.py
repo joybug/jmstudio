@@ -751,6 +751,15 @@ HTML_CONTENT = """<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        window.onerror = function(message, source, lineno, colno, error) {
+            alert("JS Error: " + message + " in " + source + " at line " + lineno + ":" + colno + "\nStack: " + (error ? error.stack : "N/A"));
+            return false;
+        };
+        window.onunhandledrejection = function(event) {
+            alert("Unhandled Promise Rejection: " + event.reason + "\nStack: " + (event.reason ? event.reason.stack : "N/A"));
+        };
+    </script>
     <title>Joy Markdown Studio v3.8.1</title>
     <!-- 외부 라이브러리 CDN 로드 -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
@@ -3801,7 +3810,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             }
         };
 
-        document.addEventListener('DOMContentLoaded', async () => {
+        async function startApp() {
             initCodeMirror();
 
             if (window.pywebview) {
@@ -4167,8 +4176,13 @@ HTML_CONTENT = """<!DOCTYPE html>
         };
         
         // Drag and drop setup
-            setupDragAndDrop();
-        });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', startApp);
+        } else {
+            startApp();
+        }
 
 
 
@@ -5883,7 +5897,7 @@ def main():
     )
     
     # Windows System.Drawing.Icon은 오직 .ico 파일만 수용하므로 변환된 .ico 사용
-    webview.start(icon=dest_ico if os.path.exists(dest_ico) else None)
+    webview.start(icon=dest_ico if os.path.exists(dest_ico) else None, debug=True)
 
 if __name__ == "__main__":
     main()
