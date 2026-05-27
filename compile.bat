@@ -41,13 +41,13 @@ echo.
 echo [Step 3] Compiling jmstudio.py into a Standalone Executable...
 echo (This may take 1-2 minutes. Please do not close this window...)
 
-rem jmstudio.py에서 버전 정보 추출 (예: v3.61)
-for /f "tokens=2 delims=v" %%a in ('findstr /C:"APP_NAME =" jmstudio.py') do (
+rem app_config.py에서 버전 정보 추출 (예: v3.8.7)
+for /f "tokens=2 delims=v" %%a in ('findstr /C:"APP_NAME =" app_config.py') do (
     set TMP_VER=%%a
 )
 set APP_VER=v%TMP_VER:~0,-1%
 
-%PY_CMD% -m PyInstaller --clean --noconfirm --onefile --windowed --icon=app_icon.ico --name="JoyMarkdownStudio-%APP_VER%" jmstudio.py
+%PY_CMD% -m PyInstaller --clean --noconfirm --onefile --windowed --add-data "frontend;frontend" --icon=app_icon.ico --name="JoyMarkdownStudio-%APP_VER%" main.py
 if %errorlevel% neq 0 (
     echo [ERROR] PyInstaller compilation failed!
     pause

@@ -1,4 +1,4 @@
-# 🧪 Joy Markdown Studio v3.8.6 🌟
+# 🧪 Joy Markdown Studio v3.8.7 🌟
 
 > **The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio**  
 > A premium desktop markdown creator application crafted with Python (`PyWebView` + `Bottle`) and modern Vanilla CSS/JS.
@@ -12,7 +12,7 @@
 
 ## ✨ Key Features
 
-### 1. 📝 CodeMirror 6 Editor Core Enhancement (v3.8.6 New)
+### 1. 📝 CodeMirror 6 Editor Core & Full Modularization (v3.8.7 New)
 * **High-Speed Modern Editor Engine**: Replaced the standard textarea with the high-performance CodeMirror 6 engine. It provides a fast and stable typing environment even with massive markdown documents.
 * **Maximizing Coding Productivity**: Packed with essential coding assists such as auto-close brackets, robust undo/redo history, and custom shortcuts found in modern editors.
 
@@ -96,9 +96,13 @@ graph TD
 
 ```
 e:\jm_studio\
-├── jmstudio.py                  # Main executable (includes backend server, GUI shell, and frontend HTML)
-├── compile.bat                  # Script to auto-compile Windows standalone executable (.exe) (virtualenv support)
-├── compile.sh                   # Script to auto-compile macOS standalone app (.app) (virtualenv support)
+├── jmstudio.py                  # Backward-compatible delegate main script (launches main.py)
+├── main.py                      # Application entry point and GUI/WebView launcher
+├── app_config.py                # Configuration loader/saver and global variables management
+├── api_bridge.py                # Secure JavaScript-to-Python PyWebView API bridge
+├── routes.py                    # Bottle-based local web server routing and static assets handler
+├── compile.bat                  # Compiler script for Windows standalone executable (.exe)
+├── compile.sh                   # Compiler script for macOS standalone app (.app)
 ├── git_push.bat                 # Script to push to GitHub remote repository (jmstudio)
 ├── .gitignore                   # Excludes build outputs, temporary cache, and config files from Git
 ├── md_viewer_config.json        # Database storing library files, recently opened file, theme, and settings
@@ -107,6 +111,16 @@ e:\jm_studio\
 ├── document.md                  # Temporary markdown storage sample
 ├── README.md                    # English help document (this file)
 ├── README_kr.md                 # Korean help document
+├── setup.py                     # Python package configuration script for PyPI uploading
+├── MANIFEST.in                  # Manifest file specifying static assets to include in PyPI package
+├── frontend/                    # Frontend static web assets directory
+│   ├── index.html               # Single Page Application (SPA) skeleton with modular script loader
+│   └── static/                  # Static assets directory
+│       ├── css/
+│       │   └── style.css        # Vanilla CSS file containing glassmorphism design tokens & themes
+│       └── js/
+│           ├── translations.js  # Multilingual translations database (Korean / English)
+│           └── editor.js        # CodeMirror 6 editor engine, KateX math, chemical drawer, diagrams, & window bindings
 └── doc/                         # Academic and rendering guide documents folder (KR/EN)
     ├── chemical_formula_guide_kr.md        # Chemical formula (SMILES) rendering guide (Korean)
     ├── chemical_formula_guide_en.md        # Chemical formula (SMILES) rendering guide (English)

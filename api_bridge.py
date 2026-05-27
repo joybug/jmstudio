@@ -1,0 +1,598 @@
+import os
+import json
+import webview
+import socket
+import urllib.parse
+from app_config import get_config, save_config, PORT, BIND_IP
+
+# 전역 window 레퍼런스 (main.py에서 주입)
+window = None
+
+def get_local_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except:
+        return "127.0.0.1"
+
+class MdViewerApi:
+    def __init__(self):
+        # active_workspace 관리
+        config = get_config()
+        self.workspace = os.path.abspath(os.getcwd())
+        if "last_workspace" in config and os.path.exists(config["last_workspace"]):
+            self.workspace = os.path.abspath(config["last_workspace"])
+
+    def get_initial_state(self):
+        files_tree = self.list_files()
+        cfg = get_config()
+        valid_docs = cfg.get("added_documents", [])
+        
+        last_file = cfg.get("last_file", "")
+        if last_file:
+            norm_last_file = os.path.normpath(last_file).replace('\\', '/').lower()
+            norm_valid_docs = {os.path.normpath(p).replace('\\', '/').lower() for p in valid_docs}
+            if norm_last_file not in norm_valid_docs:
+                last_file = ""
+                cfg["last_file"] = ""
+                save_config(cfg)
+                
+        return {
+            "workspace": self.workspace,
+            "theme": cfg.get("theme", "dark"),
+            "lang": cfg.get("lang", "ko"),
+            "last_file": last_file,
+            "files": files_tree,
+            "port": cfg.get("port", PORT),
+            "bind_ip": cfg.get("bind_ip", BIND_IP),
+            "access_password": cfg.get("access_password", ""),
+            "local_ip": get_local_ip()
+        }
+
+    def save_network_settings(self, bind_ip, port, access_password):
+        try:
+            cfg = get_config()
+            cfg["bind_ip"] = bind_ip
+            cfg["port"] = int(port)
+            cfg["access_password"] = access_password.strip()
+            save_config(cfg)
+            return {"status": "success"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    def open_library_folder(self):
+        try:
+            os.startfile(self.workspace)
+            return {"status": "success"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    def add_documents_to_library(self):
+        global window
+        try:
+            if window is None:
+                return {"status": "error", "message": "Window instance not bound"}
+                
+            file_paths = window.create_file_dialog(
+                webview.OPEN_DIALOG,
+                allow_multiple=True,
+                file_types=('Markdown Documents (*.md;*.qmd;*.markdown;*.txt)', 'All files (*.*)')
+            )
+            if file_paths:
+                added_count = 0
+                new_paths = []
+                for path in file_paths:
+                    if os.path.exists(path) and os.path.isfile(path):
+                        norm_path = os.path.abspath(path).replace('\\', '/')
+                        new_paths.append(norm_path)
+                        added_count += 1
+                        
+                if added_count > 0:
+                    cfg = get_config()
+                    added_docs = cfg.get("added_documents", [])
+                    for p in new_paths:
+                        if p not in added_docs:
+                            added_docs.append(p)
+                    cfg["added_documents"] = added_docs
+                    save_config(cfg)
+                    
+                    return {
+                        "status": "success",
+                        "message": f"{added_count}개의 문서가 원래 위치 그대로 서재에 추가되었습니다.",
+                        "files": self.list_files()
+                    }
+            return {"status": "cancel"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    def list_files(self):
+        cfg = get_config()
+        if "added_documents" not in cfg:
+            initial_docs = []
+            try:
+                for item in sorted(os.listdir(self.workspace)):
+                    if item.startswith('.') or os.path.isdir(os.path.join(self.workspace, item)):
+                        continue
+                    if item.lower().endswith(('.md', '.qmd', '.markdown', '.txt')):
+                        initial_docs.append(item)
+            except:
+                pass
+            cfg["added_documents"] = initial_docs
+            save_config(cfg)
+            
+        added_docs = cfg.get("added_documents", [])
+        
+        valid_docs = []
+        changed = False
+        for path in added_docs:
+            if os.path.isabs(path):
+                full_path = path
+            else:
+                full_path = os.path.join(self.workspace, path)
+                
+            if os.path.exists(full_path) and os.path.isfile(full_path):
+                valid_docs.append(path)
+            else:
+                changed = True
+                
+        if changed:
+            cfg["added_documents"] = valid_docs
+            save_config(cfg)
+            
+        relative_paths = [p for p in valid_docs if not os.path.isabs(p)]
+        tree = self._build_tree_from_paths(relative_paths)
+        
+        for p in sorted(valid_docs):
+            if os.path.isabs(p):
+                filename = os.path.basename(p)
+                size = os.path.getsize(p) if os.path.exists(p) else 0
+                tree.append({
+                    "name": f"📄 {filename}",
+                    "type": "file",
+                    "path": p,
+                    "size": size,
+                    "is_external": True
+                })
+        return tree
+
+    def _build_tree_from_paths(self, paths):
+        root = {}
+        for path in sorted(paths):
+            parts = path.split('/')
+            current = root
+            current_path_parts = []
+            for i, part in enumerate(parts):
+                current_path_parts.append(part)
+                current_path = "/".join(current_path_parts)
+                
+                is_file = (i == len(parts) - 1)
+                
+                if part not in current:
+                    if is_file:
+                        full_path = os.path.join(self.workspace, path)
+                        size = os.path.getsize(full_path) if os.path.exists(full_path) else 0
+                        current[part] = {
+                            "_data": {
+                                "name": part,
+                                "type": "file",
+                                "path": path,
+                                "size": size
+                            }
+                        }
+                    else:
+                        current[part] = {
+                            "_data": {
+                                "name": part,
+                                "type": "folder",
+                                "path": current_path,
+                                "children": []
+                            }
+                        }
+                current = current[part]
+                
+        def convert(node):
+            res = []
+            for key, val in sorted(node.items()):
+                if key == "_data":
+                    continue
+                data = val["_data"].copy()
+                if data["type"] == "folder":
+                    data["children"] = convert(val)
+                res.append(data)
+            return res
+            
+        return convert(root)
+
+    def read_file(self, rel_path):
+        if os.path.isabs(rel_path):
+            full_path = os.path.abspath(rel_path)
+        else:
+            full_path = os.path.abspath(os.path.join(self.workspace, rel_path))
+            if not full_path.startswith(self.workspace):
+                return {"status": "error", "message": "Access denied"}
+        try:
+            with open(full_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            
+            cfg = get_config()
+            cfg["last_file"] = rel_path
+            save_config(cfg)
+            
+            return {"status": "success", "content": content, "path": rel_path}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    def save_file(self, rel_path, content):
+        if os.path.isabs(rel_path):
+            full_path = os.path.abspath(rel_path)
+        else:
+            full_path = os.path.abspath(os.path.join(self.workspace, rel_path))
+            if not full_path.startswith(self.workspace):
+                return {"status": "error", "message": "Access denied"}
+        try:
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
+            with open(full_path, "w", encoding="utf-8") as f:
+                f.write(content)
+            return {"status": "success"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    def create_item(self, rel_path, item_type):
+        full_path = os.path.abspath(os.path.join(self.workspace, rel_path))
+        if not full_path.startswith(self.workspace):
+            return {"status": "error", "message": "Access denied"}
+        try:
+            if item_type == "folder":
+                os.makedirs(full_path, exist_ok=True)
+            else:
+                os.makedirs(os.path.dirname(full_path), exist_ok=True)
+                with open(full_path, "w", encoding="utf-8") as f:
+                    f.write("")
+                cfg = get_config()
+                added_docs = cfg.get("added_documents", [])
+                if rel_path not in added_docs:
+                    added_docs.append(rel_path)
+                    cfg["added_documents"] = added_docs
+                    save_config(cfg)
+            return {"status": "success", "files": self.list_files()}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    def delete_item(self, rel_path):
+        try:
+            cfg = get_config()
+            added_docs = cfg.get("added_documents", [])
+            added_docs = [p for p in added_docs if p != rel_path and not p.startswith(rel_path + "/")]
+            cfg["added_documents"] = added_docs
+            
+            last_file = cfg.get("last_file", "")
+            if last_file:
+                norm_last = os.path.normpath(last_file).replace('\\', '/').lower()
+                norm_rel = os.path.normpath(rel_path).replace('\\', '/').lower()
+                if norm_last == norm_rel or norm_last.startswith(norm_rel + "/"):
+                    cfg["last_file"] = ""
+                    
+            save_config(cfg)
+            return {"status": "success", "files": self.list_files()}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    def rename_item(self, old_rel_path, new_rel_path):
+        old_full = os.path.abspath(os.path.join(self.workspace, old_rel_path))
+        new_full = os.path.abspath(os.path.join(self.workspace, new_rel_path))
+        if not old_full.startswith(self.workspace) or not new_full.startswith(self.workspace):
+            return {"status": "error", "message": "Access denied"}
+        try:
+            os.rename(old_full, new_full)
+            cfg = get_config()
+            added_docs = cfg.get("added_documents", [])
+            new_added_docs = []
+            for p in added_docs:
+                if p == old_rel_path:
+                    new_added_docs.append(new_rel_path)
+                elif p.startswith(old_rel_path + "/"):
+                    suffix = p[len(old_rel_path):]
+                    new_added_docs.append(new_rel_path + suffix)
+                else:
+                    new_added_docs.append(p)
+            cfg["added_documents"] = new_added_docs
+            save_config(cfg)
+            return {"status": "success", "files": self.list_files()}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    def search_pubchem_smiles(self, compound_name):
+        import urllib.request
+        import urllib.parse
+        try:
+            encoded_name = urllib.parse.quote(compound_name.strip())
+            url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{encoded_name}/property/CanonicalSMILES,SMILES/JSON"
+            
+            req = urllib.request.Request(
+                url, 
+                headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+            )
+            
+            with urllib.request.urlopen(req, timeout=5) as response:
+                data = json.loads(response.read().decode('utf-8'))
+                
+            properties = data.get("PropertyTable", {}).get("Properties", [])
+            if properties:
+                cid = properties[0].get("CID")
+                smiles = properties[0].get("CanonicalSMILES") or properties[0].get("SMILES") or properties[0].get("ConnectivitySMILES")
+                
+                if smiles:
+                    return {
+                        "status": "success",
+                        "cid": cid,
+                        "smiles": smiles,
+                        "name": compound_name
+                    }
+            return {"status": "error", "message": "화합물은 발견되었으나 분자식을 찾을 수 없습니다."}
+        except Exception as e:
+            korean_mapping = {
+                "아스피린": "aspirin", "타이레놀": "acetaminophen", "아세트아미노펜": "acetaminophen",
+                "카페인": "caffeine", "니코틴": "nicotine", "포도당": "glucose",
+                "설탕": "sucrose", "물": "water", "이산화탄소": "carbon dioxide",
+                "암모니아": "ammonia", "황산": "sulfuric acid", "염산": "hydrochloric acid",
+                "메탄": "methane", "에탄올": "ethanol", "아세톤": "acetone",
+                "벤젠": "benzene", "톨루엔": "toluene", "페놀": "phenol",
+                "아닐린": "aniline", "글리신": "glycine", "알라닌": "alanine",
+                "이부프로펜": "ibuprofen", "페니실린": "penicillin G", "멘톨": "menthol",
+                "비타민c": "ascorbic acid", "비타민 c": "ascorbic acid", "구연산": "citric acid",
+                "시트르산": "citric acid", "캡사이신": "capsaicin", "도파민": "dopamine",
+                "세로토닌": "serotonin", "아드레날린": "epinephrine", "멜라토닌": "melatonin"
+            }
+            clean_name = compound_name.strip().lower()
+            if clean_name in korean_mapping:
+                return self.search_pubchem_smiles(korean_mapping[clean_name])
+            return {"status": "error", "message": f"PubChem 검색 실패: {str(e)}"}
+
+    def save_theme(self, theme_name):
+        cfg = get_config()
+        cfg["theme"] = theme_name
+        save_config(cfg)
+        return {"status": "success"}
+
+    def get_graph_data(self):
+        import os, re
+        nodes = []
+        links = []
+        node_ids = set()
+        ws = self.workspace
+        
+        cfg = get_config()
+        added_docs = cfg.get("added_documents", [])
+        saved_positions = cfg.get("graph_node_positions", {})
+        
+        for path in added_docs:
+            if os.path.isabs(path):
+                full_path = path
+            else:
+                full_path = os.path.join(ws, path)
+                
+            if os.path.exists(full_path) and os.path.isfile(full_path):
+                filename = os.path.basename(path)
+                filename_lower = filename.lower()
+                if filename_lower.endswith(('.md', '.qmd', '.markdown', '.txt')):
+                    node_id = os.path.splitext(filename)[0]
+                    node_data = {"id": node_id, "name": filename, "path": path}
+                    
+                    if node_id in saved_positions:
+                        pos = saved_positions[node_id]
+                        if pos:
+                            node_data["fx"] = pos.get("fx")
+                            node_data["fy"] = pos.get("fy")
+                            
+                    nodes.append(node_data)
+                    node_ids.add(node_id)
+                    try:
+                        with open(full_path, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                            matches = re.findall(r'\[\[(.*?)\]\]', content)
+                            for m in matches:
+                                target = m.split('|')[0].strip()
+                                target_lower = target.lower()
+                                if target_lower.endswith('.markdown'):
+                                    target = target[:-9]
+                                elif target_lower.endswith('.qmd'):
+                                    target = target[:-4]
+                                elif target_lower.endswith('.txt'):
+                                    target = target[:-4]
+                                elif target_lower.endswith('.md'):
+                                    target = target[:-3]
+                                links.append({"source": node_id, "target": target})
+                    except:
+                        pass
+                        
+        for link in links:
+            if link['target'] not in node_ids:
+                node_data = {"id": link['target'], "name": link['target'] + ".md", "path": "", "missing": True}
+                if link['target'] in saved_positions:
+                    pos = saved_positions[link['target']]
+                    if pos:
+                        node_data["fx"] = pos.get("fx")
+                        node_data["fy"] = pos.get("fy")
+                nodes.append(node_data)
+                node_ids.add(link['target'])
+                
+        return {"nodes": nodes, "links": links}
+
+    def save_graph_node_positions(self, positions):
+        try:
+            cfg = get_config()
+            cfg["graph_node_positions"] = positions
+            save_config(cfg)
+            return {"status": "success"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    def save_lang(self, lang):
+        cfg = get_config()
+        cfg["lang"] = lang
+        save_config(cfg)
+        return {"status": "success"}
+
+    def save_graph_image(self, base64_data):
+        global window
+        try:
+            if window is None:
+                return {"status": "error", "message": "Window instance not bound"}
+            if ',' in base64_data:
+                base64_data = base64_data.split(',')[1]
+            import base64
+            img_bytes = base64.b64decode(base64_data)
+            
+            file_path = window.create_file_dialog(
+                webview.SAVE_DIALOG,
+                directory=self.workspace,
+                save_filename='zettelkasten_graph.png',
+                file_types=('PNG Image (*.png)', 'All files (*.*)')
+            )
+            if file_path:
+                if isinstance(file_path, (list, tuple)):
+                    file_path = file_path[0]
+                with open(file_path, 'wb') as f:
+                    f.write(img_bytes)
+                return {"status": "success"}
+            return {"status": "cancel"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    def export_html(self, rel_path, html_body, title):
+        base_no_ext, _ = os.path.splitext(rel_path)
+        dest_rel = base_no_ext + ".html"
+        dest_full = os.path.abspath(os.path.join(self.workspace, dest_rel))
+        
+        standalone_html = f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{title}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+    
+    <style>
+        :root {{
+            --bg-primary: #0d0e12;
+            --bg-secondary: #14161e;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent: #45f3ff;
+            --accent-glow: rgba(69, 243, 255, 0.15);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --callout-note: #3b82f6;
+            --callout-tip: #10b981;
+            --callout-warning: #f59e0b;
+            --callout-important: #ef4444;
+        }}
+        body {{
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }}
+        .container {{
+            max-width: 860px;
+            width: 100%;
+        }}
+        h1, h2, h3, h4, h5, h6 {{
+            font-family: 'Outfit', sans-serif;
+            color: #ffffff;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }}
+        h1 {{ border-bottom: 1px solid var(--border-color); padding-bottom: 0.3em; font-size: 2.2em; }}
+        h2 {{ border-bottom: 1px solid var(--border-color); padding-bottom: 0.2em; font-size: 1.6em; }}
+        p {{ line-height: 1.7; font-size: 1.05em; color: #cbd5e1; }}
+        a {{ color: var(--accent); text-decoration: none; border-bottom: 1px dashed var(--accent); }}
+        a:hover {{ filter: brightness(1.2); }}
+        
+        pre {{
+            background: var(--bg-secondary) !important;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            overflow-x: auto;
+        }}
+        code {{
+            font-family: 'Fira Code', monospace;
+            font-size: 0.95em;
+        }}
+        :not(pre) > code {{
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--accent);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }}
+        
+        .callout {{
+            border-left: 4px solid var(--callout-note);
+            background: rgba(59, 130, 246, 0.05);
+            border-radius: 6px;
+            padding: 16px;
+            margin: 20px 0;
+        }}
+        .callout-header {{
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }}
+        .callout-note {{ border-left-color: var(--callout-note); background: rgba(59, 130, 246, 0.06); }}
+        .callout-tip {{ border-left-color: var(--callout-tip); background: rgba(16, 185, 129, 0.06); }}
+        .callout-warning {{ border-left-color: var(--callout-warning); background: rgba(245, 158, 11, 0.06); }}
+        .callout-important, .callout-caution {{ border-left-color: var(--callout-important); background: rgba(239, 68, 68, 0.06); }}
+        
+        .mermaid-container {{
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+        }}
+        table {{
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }}
+        th, td {{
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            text-align: left;
+        }}
+        th {{
+            background: rgba(255, 255, 255, 0.03);
+            font-weight: 600;
+        }}
+    </style>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({{ startOnLoad: true, theme: 'dark' }});
+    </script>
+</head>
+<body>
+    <div class="container">
+        {html_body}
+    </div>
+</body>
+</html>
+"""
+        try:
+            with open(dest_full, "w", encoding="utf-8") as f:
+                f.write(standalone_html)
+            return {"status": "success", "dest": dest_rel}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}

@@ -1,4 +1,4 @@
-# 🧪 Joy Markdown Studio v3.8.6 🌟
+# 🧪 Joy Markdown Studio v3.8.7 🌟
 
 > **수학, 물리학, 화학을 아우르는 최상의 이공계 연구 및 학술용 마크다운 편집·시각화 스튜디오**  
 > Python (`PyWebView` + `Bottle`)과 모던 Vanilla CSS/JS로 직조된 프리미엄 데스크톱 마크다운 크리에이터 앱입니다.
@@ -12,7 +12,7 @@
 
 ## ✨ Key Features (핵심 기능)
 
-### 1. 📝 CodeMirror 6 에디터 코어 고도화 (v3.8.6 New)
+### 1. 📝 CodeMirror 6 에디터 코어 고도화 및 풀 모듈화 완료 (v3.8.7 New)
 * **초고속 모던 에디터 엔진**: 기존 텍스트에리어를 대체하여 강력한 성능의 CodeMirror 6 엔진을 도입했습니다. 방대한 마크다운 문서에서도 빠르고 안정적인 타이핑 환경을 제공합니다.
 * **코딩 생산성 극대화**: 자동 괄호 닫기(Auto-close brackets), 히스토리 지원(Undo/Redo), 커스텀 단축키 등 모던 에디터에 필수적인 강력한 코딩 보조 기능들이 탑재되었습니다.
 
@@ -120,18 +120,31 @@ graph TD
 
 ```
 e:\jm_studio\
-├── jmstudio.py                  # 메인 실행 파일 (백엔드 서버 및 GUI 셸, 프론트 HTML 소스 포함)
-├── JoyMarkdownStudio.spec       # PyInstaller 빌드 스펙 파일
-├── compile.bat                  # Windows 단독 실행 파일(.exe) 자동 컴파일용 배치 스크립트 (가상환경 지원)
-├── compile.sh                   # macOS 단독 실행 앱(.app) 자동 컴파일용 쉘 스크립트 (가상환경 지원)
+├── jmstudio.py                  # 하위 호환성 보장용 대리인 메인 스크립트 (main.py 호출)
+├── main.py                      # 애플리케이션 진입점 및 GUI/웹뷰 런처
+├── app_config.py                # 유저 설정 파일 로드/저장 및 전역 상수 관리
+├── api_bridge.py                # PyWebView 자바스크립트-파이썬 보안 API 브릿지 인터페이스
+├── routes.py                    # Bottle 기반 로컬 웹서버 라우팅 및 정적 자산 서빙
+├── compile.bat                  # Windows 단독 실행 파일(.exe) 자동 컴파일용 배치 스크립트
+├── compile.sh                   # macOS 단독 실행 앱(.app) 자동 컴파일용 쉘 스크립트
 ├── git_push.bat                 # 원격 깃허브 저장소(jmstudio) 자동 push 배치 스크립트
-├── .gitignore                   # 불필요한 빌드 부산물, 임시 캐시 및 설정 제외를 위한 규칙 파일
+├── .gitignore                   # 빌드 부산물, 임시 캐시 및 설정 제외를 위한 규칙 파일
 ├── md_viewer_config.json        # 서재 파일 목록, 최근 본 파일, 테마 등 유저 설정 상태 저장 DB
 ├── app_icon.png                 # 스튜디오 런처 로고 이미지
 ├── app_icon.ico                 # 윈도우 OS 창 프레임 및 시스템 트레이 바인딩용 다중 사이즈 아이콘
 ├── document.md                  # 샘플 마크다운 임시 저장소
 ├── README.md                    # 영문 도움말 문서
 ├── README_kr.md                 # 한국어 도움말 문서 (이 파일)
+├── setup.py                     # PyPI 패키징 및 업로드용 설정을 관리하는 파이썬 스크립트
+├── MANIFEST.in                  # PyPI 패키징 시 static 리소스들을 포함하도록 지정하는 매니페스트 파일
+├── frontend/                    # 프론트엔드 정적 웹 리소스 폴더
+│   ├── index.html               # 모듈러 스크립트 태그가 정렬된 단일 페이지 앱(SPA) 뼈대
+│   └── static/                  # 정적 하위 자산 폴더
+│       ├── css/
+│       │   └── style.css        # 글래스모피즘 및 화면 테마가 정의된 Vanilla CSS 통합 파일
+│       └── js/
+│           ├── translations.js  # 한국어 및 영어 실시간 번역 딕셔너리 테이블
+│           └── editor.js        # CodeMirror 6 에디터 제어, 수학 기호, 화학식, 다이어그램, 전역 윈도우 바인딩 모듈
 └── doc/                         # 학술 및 렌더링 가이드 문서 폴더 (한국어/영문: _kr, _en 접미사)
     ├── chemical_formula_guide_kr.md        # 화학 분자식 (SMILES) 렌더링 및 사용 가이드 (한국어)
     ├── chemical_formula_guide_en.md        # 화학 분자식 (SMILES) 렌더링 및 사용 가이드 (영문)

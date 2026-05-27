@@ -1,0 +1,27 @@
+import os
+import json
+
+CONFIG_FILE = "md_viewer_config.json"
+
+def get_config():
+    if os.path.exists(CONFIG_FILE):
+        try:
+            with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except:
+            pass
+    return {}
+
+def save_config(config):
+    try:
+        with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+            json.dump(config, f, ensure_ascii=False, indent=4)
+        return True
+    except:
+        return False
+
+# 설정 로드 및 전역 환경변수 관리
+config = get_config()
+APP_NAME = "Joy Markdown Studio v3.8.7"
+PORT = int(config.get("port", 58220))
+BIND_IP = config.get("bind_ip", "0.0.0.0")
