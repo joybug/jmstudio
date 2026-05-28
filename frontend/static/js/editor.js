@@ -1565,7 +1565,12 @@ class UndoManager {
                 { value: 'info_security', label: '정보이론 기반' }
             ],
             ee: [
-                { value: 'ee_basic', label: '회로 및 신호이론' }
+                { value: 'ee_ops', label: '자주 쓰이는 연산자' },
+                { value: 'ee_circuits', label: '회로 이론' },
+                { value: 'ee_em', label: '전자기학' },
+                { value: 'ee_signals', label: '신호 및 시스템' },
+                { value: 'ee_semicon', label: '반도체 물리' },
+                { value: 'ee_control', label: '제어공학' }
             ]
         };
 
