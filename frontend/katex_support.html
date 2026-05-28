@@ -96,19 +96,15 @@
 
         .search-input {
             flex: 1;
-            background: rgba(255, 255, 255, 0.03);
+            background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 8px;
-            color: var(--text-main);
+            color: var(--text-main) !important;
             padding: 10px 16px;
             font-size: 0.9em;
             outline: none;
             transition: all 0.2s;
             font-family: inherit;
-        }
-
-        .theme-light .search-input {
-            background: rgba(0, 0, 0, 0.02);
         }
 
         .search-input:focus {
@@ -117,24 +113,27 @@
         }
 
         .category-select {
-            background: rgba(255, 255, 255, 0.03);
+            background: var(--bg-card) !important;
+            color: var(--text-main) !important;
             border: 1px solid var(--border);
             border-radius: 8px;
-            color: var(--text-main);
             padding: 10px 16px;
             font-size: 0.9em;
             outline: none;
             cursor: pointer;
             min-width: 180px;
             font-family: inherit;
-        }
-
-        .theme-light .category-select {
-            background: rgba(0, 0, 0, 0.02);
+            transition: all 0.2s;
         }
 
         .category-select:focus {
             border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .category-select option {
+            background-color: var(--bg-card) !important;
+            color: var(--text-main) !important;
         }
 
         /* 콘텐츠 영역 */
@@ -162,25 +161,37 @@
         }
 
         summary {
-            padding: 16px 20px;
-            font-family: 'Outfit', sans-serif;
-            font-weight: 600;
-            font-size: 1.05em;
             cursor: pointer;
+            outline: none;
+            padding: 0;
+            list-style: none;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .summary-content {
+            padding: 16px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            outline: none;
+            width: 100%;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 1.05em;
+            color: var(--text-main) !important;
+            box-sizing: border-box;
         }
 
-        summary:hover {
+        .summary-content:hover {
             background: rgba(255, 255, 255, 0.02);
         }
-        .theme-light summary:hover {
+        .theme-light .summary-content:hover {
             background: rgba(0, 0, 0, 0.02);
         }
 
-        summary::after {
+        .summary-content::after {
             content: '';
             display: inline-block;
             width: 8px;
@@ -190,15 +201,12 @@
             transform: rotate(-45deg);
             transition: transform 0.2s, border-color 0.2s;
             margin-right: 4px;
+            flex-shrink: 0;
         }
 
-        details[open] summary::after {
+        details[open] .summary-content::after {
             transform: rotate(45deg);
             border-color: var(--accent);
-        }
-
-        summary::-webkit-details-marker {
-            display: none;
         }
 
         /* 그리드 및 카드 */
@@ -342,7 +350,7 @@
 
     <div class="content-container" id="accordion-container">
         <details class="category-accordion" id="cat-Accents">
-            <summary><span class="cat-title">Accents</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(50 items)</span></summary>
+            <summary><div class="summary-content"><span class="cat-title">Accents</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(50 items)</span></div></summary>
             <div class="card-grid">
                 <div class="card" data-symbol="a&#x27;" onclick="selectSymbol(this)">
                     <div class="preview-box"></div>
@@ -548,7 +556,7 @@
         </details>
 
         <details class="category-accordion" id="cat-Annotation">
-            <summary><span class="cat-title">Annotation</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(13 items)</span></summary>
+            <summary><div class="summary-content"><span class="cat-title">Annotation</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(13 items)</span></div></summary>
             <div class="card-grid">
                 <div class="card" data-symbol="\cancel{5}" onclick="selectSymbol(this)">
                     <div class="preview-box"></div>
@@ -606,7 +614,7 @@
         </details>
 
         <details class="category-accordion" id="cat-Arrows">
-            <summary><span class="cat-title">Arrows</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(110 items)</span></summary>
+            <summary><div class="summary-content"><span class="cat-title">Arrows</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(110 items)</span></div></summary>
             <div class="card-grid">
                 <div class="card" data-symbol="\circlearrowleft" onclick="selectSymbol(this)">
                     <div class="preview-box"></div>
@@ -1052,7 +1060,7 @@
         </details>
 
         <details class="category-accordion" id="cat-Big Operators">
-            <summary><span class="cat-title">Big Operators</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(20 items)</span></summary>
+            <summary><div class="summary-content"><span class="cat-title">Big Operators</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(20 items)</span></div></summary>
             <div class="card-grid">
                 <div class="card" data-symbol="\sum" onclick="selectSymbol(this)">
                     <div class="preview-box"></div>
@@ -1138,7 +1146,7 @@
         </details>
 
         <details class="category-accordion" id="cat-Binary Operators">
-            <summary><span class="cat-title">Binary Operators</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(66 items)</span></summary>
+            <summary><div class="summary-content"><span class="cat-title">Binary Operators</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(66 items)</span></div></summary>
             <div class="card-grid">
                 <div class="card" data-symbol="+" onclick="selectSymbol(this)">
                     <div class="preview-box"></div>
@@ -1408,7 +1416,7 @@
         </details>
 
         <details class="category-accordion" id="cat-Delimiters">
-            <summary><span class="cat-title">Delimiters</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(70 items)</span></summary>
+            <summary><div class="summary-content"><span class="cat-title">Delimiters</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(70 items)</span></div></summary>
             <div class="card-grid">
                 <div class="card" data-symbol="( )" onclick="selectSymbol(this)">
                     <div class="preview-box"></div>
@@ -1694,7 +1702,7 @@
         </details>
 
         <details class="category-accordion" id="cat-Environments">
-            <summary><span class="cat-title">Environments</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(924 items)</span></summary>
+            <summary><div class="summary-content"><span class="cat-title">Environments</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(924 items)</span></div></summary>
             <div class="card-grid">
                 <div class="card" data-symbol="\begin{matrix}" onclick="selectSymbol(this)">
                     <div class="preview-box"></div>
@@ -5396,7 +5404,7 @@
         </details>
 
         <details class="category-accordion" id="cat-Fractions and Binomials">
-            <summary><span class="cat-title">Fractions and Binomials</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(8 items)</span></summary>
+            <summary><div class="summary-content"><span class="cat-title">Fractions and Binomials</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(8 items)</span></div></summary>
             <div class="card-grid">
                 <div class="card" data-symbol="\frac{a}{b}" onclick="selectSymbol(this)">
                     <div class="preview-box"></div>
@@ -5434,7 +5442,7 @@
         </details>
 
         <details class="category-accordion" id="cat-HTML">
-            <summary><span class="cat-title">HTML</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(9 items)</span></summary>
+            <summary><div class="summary-content"><span class="cat-title">HTML</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(9 items)</span></div></summary>
             <div class="card-grid">
                 <div class="card" data-symbol="\href{https://katex.org/}{\KaTeX}" onclick="selectSymbol(this)">
                     <div class="preview-box"></div>
@@ -5476,7 +5484,7 @@
         </details>
 
         <details class="category-accordion" id="cat-Letters and Unicode">
-            <summary><span class="cat-title">Letters and Unicode</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(110 items)</span></summary>
+            <summary><div class="summary-content"><span class="cat-title">Letters and Unicode</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(110 items)</span></div></summary>
             <div class="card-grid">
                 <div class="card" data-symbol="\Alpha" onclick="selectSymbol(this)">
                     <div class="preview-box"></div>
@@ -5922,7 +5930,7 @@
         </details>
 
         <details class="category-accordion" id="cat-Line Breaks">
-            <summary><span class="cat-title">Line Breaks</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(4 items)</span></summary>
+            <summary><div class="summary-content"><span class="cat-title">Line Breaks</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(4 items)</span></div></summary>
             <div class="card-grid">
                 <div class="card" data-symbol="\nobreak" onclick="selectSymbol(this)">
                     <div class="preview-box"></div>
@@ -5944,7 +5952,7 @@
         </details>
 
         <details class="category-accordion" id="cat-Logic and Set Theory">
-            <summary><span class="cat-title">Logic and Set Theory</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(31 items)</span></summary>
+            <summary><div class="summary-content"><span class="cat-title">Logic and Set Theory</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(31 items)</span></div></summary>
             <div class="card-grid">
                 <div class="card" data-symbol="\forall" onclick="selectSymbol(this)">
                     <div class="preview-box"></div>
@@ -6074,7 +6082,7 @@
         </details>
 
         <details class="category-accordion" id="cat-Macros">
-            <summary><span class="cat-title">Macros</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(7 items)</span></summary>
+            <summary><div class="summary-content"><span class="cat-title">Macros</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(7 items)</span></div></summary>
             <div class="card-grid">
                 <div class="card" data-symbol="\def\foo{x^2} \foo + \foo" onclick="selectSymbol(this)">
                     <div class="preview-box"></div>
@@ -6108,7 +6116,7 @@
         </details>
 
         <details class="category-accordion" id="cat-Math Operators">
-            <summary><span class="cat-title">Math Operators</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(55 items)</span></summary>
+            <summary><div class="summary-content"><span class="cat-title">Math Operators</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(55 items)</span></div></summary>
             <div class="card-grid">
                 <div class="card" data-symbol="\arcsin" onclick="selectSymbol(this)">
                     <div class="preview-box"></div>
@@ -6334,7 +6342,7 @@
         </details>
 
         <details class="category-accordion" id="cat-Negated Relations">
-            <summary><span class="cat-title">Negated Relations</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(59 items)</span></summary>
+            <summary><div class="summary-content"><span class="cat-title">Negated Relations</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(59 items)</span></div></summary>
             <div class="card-grid">
                 <div class="card" data-symbol="\not =" onclick="selectSymbol(this)">
                     <div class="preview-box"></div>
@@ -6576,7 +6584,7 @@
         </details>
 
         <details class="category-accordion" id="cat-Overlap and Spacing">
-            <summary><span class="cat-title">Overlap and Spacing</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(7 items)</span></summary>
+            <summary><div class="summary-content"><span class="cat-title">Overlap and Spacing</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(7 items)</span></div></summary>
             <div class="card-grid">
                 <div class="card" data-symbol="\left(x^{\smash{2}}\right)" onclick="selectSymbol(this)">
                     <div class="preview-box"></div>
@@ -6610,7 +6618,7 @@
         </details>
 
         <details class="category-accordion" id="cat-Relations">
-            <summary><span class="cat-title">Relations</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(145 items)</span></summary>
+            <summary><div class="summary-content"><span class="cat-title">Relations</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(145 items)</span></div></summary>
             <div class="card-grid">
                 <div class="card" data-symbol="\stackrel{!}{=}" onclick="selectSymbol(this)">
                     <div class="preview-box"></div>
@@ -7196,7 +7204,7 @@
         </details>
 
         <details class="category-accordion" id="cat-Special Notation">
-            <summary><span class="cat-title">Special Notation</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(6 items)</span></summary>
+            <summary><div class="summary-content"><span class="cat-title">Special Notation</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(6 items)</span></div></summary>
             <div class="card-grid">
                 <div class="card" data-symbol="\bra{\phi}" onclick="selectSymbol(this)">
                     <div class="preview-box"></div>
@@ -7226,7 +7234,7 @@
         </details>
 
         <details class="category-accordion" id="cat-Style, Color, Size, and Font">
-            <summary><span class="cat-title">Style, Color, Size, and Font</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(71 items)</span></summary>
+            <summary><div class="summary-content"><span class="cat-title">Style, Color, Size, and Font</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(71 items)</span></div></summary>
             <div class="card-grid">
                 <div class="card" data-symbol="\mathbin" onclick="selectSymbol(this)">
                     <div class="preview-box"></div>
@@ -7516,7 +7524,7 @@
         </details>
 
         <details class="category-accordion" id="cat-Symbols and Punctuation">
-            <summary><span class="cat-title">Symbols and Punctuation</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(113 items)</span></summary>
+            <summary><div class="summary-content"><span class="cat-title">Symbols and Punctuation</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(113 items)</span></div></summary>
             <div class="card-grid">
                 <div class="card" data-symbol="\dots" onclick="selectSymbol(this)">
                     <div class="preview-box"></div>
@@ -7974,7 +7982,7 @@
         </details>
 
         <details class="category-accordion" id="cat-Vertical Layout">
-            <summary><span class="cat-title">Vertical Layout</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(7 items)</span></summary>
+            <summary><div class="summary-content"><span class="cat-title">Vertical Layout</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(7 items)</span></div></summary>
             <div class="card-grid">
                 <div class="card" data-symbol="\stackrel{!}{=}" onclick="selectSymbol(this)">
                     <div class="preview-box"></div>
@@ -8008,7 +8016,7 @@
         </details>
 
         <details class="category-accordion" id="cat-\sqrt">
-            <summary><span class="cat-title">\sqrt</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(2 items)</span></summary>
+            <summary><div class="summary-content"><span class="cat-title">\sqrt</span> <span style="font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 8px;">(2 items)</span></div></summary>
             <div class="card-grid">
                 <div class="card" data-symbol="\sqrt{x}" onclick="selectSymbol(this)">
                     <div class="preview-box"></div>
