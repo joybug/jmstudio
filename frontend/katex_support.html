@@ -8078,6 +8078,48 @@
                 .replace(/'/g, "&#039;");
         }
 
+        // 수식 기호/템플릿 보정 매핑 (올바른 렌더링 및 에디터 삽입을 위함)
+        const KATEX_CMD_REPLACEMENTS = {
+            '\\raisebox': '\\raisebox{0.5em}{x}',
+            '\\hbox': '\\hbox{text}',
+            '\\vcenter': '\\vcenter{\\hbox{A}}',
+            '\\llap': '\\llap{x}',
+            '\\rlap': '\\rlap{x}',
+            '\\clap': '\\clap{x}',
+            '\\mathbin': '\\mathbin{\\circ}',
+            '\\mathclose': '\\mathclose{]}',
+            '\\mathinner': '\\mathinner{\\dots}',
+            '\\mathop': '\\mathop{\\sum}',
+            '\\mathopen': '\\mathopen{[}',
+            '\\mathord': '\\mathord{x}',
+            '\\mathpunct': '\\mathpunct{;}',
+            '\\mathrel': '\\mathrel{\\sim}',
+            '\\color': '\\color{blue}{x}',
+            '\\colorbox': '\\colorbox{aqua}{x}',
+            '\\fcolorbox': '\\fcolorbox{red}{aqua}{x}',
+            '\\pmb': '\\pmb{x}',
+            '\\textXX': '\\textsl{Ab0}',
+            '\\mathsfit{Ab0}': '\\mathsf{Ab0}',
+            '\\operatornamewithlimits{f}': '\\operatorname*{f}',
+            '\\limits': '\\sum\\limits_{i=1}^n',
+            '\\Dagger': '\\ddag'
+        };
+
+        // DOM에서 보정 대상 카드를 찾아서 속성과 텍스트 동적 수정
+        document.querySelectorAll('.card').forEach(card => {
+            const symbol = card.getAttribute('data-symbol');
+            if (KATEX_CMD_REPLACEMENTS.hasOwnProperty(symbol)) {
+                const replacement = KATEX_CMD_REPLACEMENTS[symbol];
+                card.setAttribute('data-symbol', replacement);
+                
+                // cmd-box 텍스트도 변경
+                const cmdBox = card.querySelector('.cmd-box');
+                if (cmdBox) {
+                    cmdBox.textContent = replacement;
+                }
+            }
+        });
+
         // 수식 렌더링 루프
         document.querySelectorAll('.card').forEach(card => {
             const symbol = card.getAttribute('data-symbol');
