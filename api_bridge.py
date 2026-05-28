@@ -596,3 +596,32 @@ class MdViewerApi:
             return {"status": "success", "dest": dest_rel}
         except Exception as e:
             return {"status": "error", "message": str(e)}
+
+    def open_katex_support(self):
+        global window
+        try:
+            cfg = get_config()
+            theme = cfg.get("theme", "dark")
+            webview.create_window(
+                title="KaTeX Supported Functions & Symbols",
+                url=f"http://127.0.0.1:{PORT}/katex_support?theme={theme}",
+                js_api=self,
+                width=950,
+                height=800,
+                min_size=(500, 400)
+            )
+            return {"status": "success"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    def insert_katex_symbol(self, symbol):
+        global window
+        try:
+            if window:
+                escaped_symbol = json.dumps(symbol)
+                window.evaluate_js(f"insertMathSymbol({escaped_symbol})")
+                return {"status": "success"}
+            return {"status": "error", "message": "Main window is not bound"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+

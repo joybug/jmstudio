@@ -53,6 +53,8 @@ const translations = {
                 "math_title_ee_basic": "회로 및 신호이론",
                 "math_subtab_cs": "💻 컴공/AI",
                 "math_subtab_ee": "⚡ 전기/전자",
+                "math_subtab_katex": "📖 KATEX",
+
                 
                 "math_label_fraction": "분수",
                 "math_label_sqrt": "루트",
@@ -336,6 +338,8 @@ const translations = {
                 "math_title_ee_basic": "Circuits & Signals",
                 "math_subtab_cs": "💻 CS/AI",
                 "math_subtab_ee": "⚡ EE",
+                "math_subtab_katex": "📖 KATEX",
+
                 
                 "math_label_fraction": "Fraction",
                 "math_label_sqrt": "Sqrt",
