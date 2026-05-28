@@ -8080,12 +8080,15 @@
 
         // 수식 기호/템플릿 보정 매핑 (올바른 렌더링 및 에디터 삽입을 위함)
         const KATEX_CMD_REPLACEMENTS = {
+            // Layout & Spacing
             '\\raisebox': '\\raisebox{0.5em}{x}',
             '\\hbox': '\\hbox{text}',
             '\\vcenter': '\\vcenter{\\hbox{A}}',
             '\\llap': '\\llap{x}',
             '\\rlap': '\\rlap{x}',
             '\\clap': '\\clap{x}',
+            
+            // Math Class / Spacing
             '\\mathbin': '\\mathbin{\\circ}',
             '\\mathclose': '\\mathclose{]}',
             '\\mathinner': '\\mathinner{\\dots}',
@@ -8094,15 +8097,82 @@
             '\\mathord': '\\mathord{x}',
             '\\mathpunct': '\\mathpunct{;}',
             '\\mathrel': '\\mathrel{\\sim}',
+            
+            // Color & Style
             '\\color': '\\color{blue}{x}',
             '\\colorbox': '\\colorbox{aqua}{x}',
             '\\fcolorbox': '\\fcolorbox{red}{aqua}{x}',
             '\\pmb': '\\pmb{x}',
             '\\textXX': '\\textsl{Ab0}',
             '\\mathsfit{Ab0}': '\\mathsf{Ab0}',
+            
+            // Math Operators
             '\\operatornamewithlimits{f}': '\\operatorname*{f}',
             '\\limits': '\\sum\\limits_{i=1}^n',
-            '\\Dagger': '\\ddag'
+            
+            // Symbols / Punctuation
+            '\\Dagger': '\\ddag',
+            
+            // Delimiters
+            '\\left.': '\\left. x \\right|',
+            '\\right.': '\\left| x \\right.',
+            '\\LBrace': '\\lBrace',
+            '\\left': '\\left( x \\right)',
+            '\\right': '\\left( x \\right)',
+            '\\big': '\\big(',
+            '\\bigl': '\\bigl(',
+            '\\bigm': '\\bigm|',
+            '\\bigr': '\\bigr)',
+            '\\Big': '\\Big(',
+            '\\Bigl': '\\Bigl(',
+            '\\Bigm': '\\Bigm|',
+            '\\Bigr': '\\Bigr)',
+            '\\bigg': '\\bigg(',
+            '\\biggl': '\\biggl(',
+            '\\biggm': '\\biggm|',
+            '\\biggr': '\\biggr)',
+            '\\Bigg': '\\Bigg(',
+            '\\Biggl': '\\Biggl(',
+            '\\Biggm': '\\Biggm|',
+            '\\Biggr': '\\Biggr)',
+            
+            // Environments
+            '\\begin{matrix}': '\\begin{matrix} x & y \\\\ z & w \\end{matrix}',
+            '\\begin{array}{cc}': '\\begin{array}{cc} x & y \\\\ z & w \\end{array}',
+            '\\begin{pmatrix}': '\\begin{pmatrix} x & y \\\\ z & w \\end{pmatrix}',
+            '\\begin{bmatrix}': '\\begin{bmatrix} x & y \\\\ z & w \\end{bmatrix}',
+            '\\begin{vmatrix}': '\\begin{vmatrix} x & y \\\\ z & w \\end{vmatrix}',
+            '\\begin{Vmatrix}': '\\begin{Vmatrix} x & y \\\\ z & w \\end{Vmatrix}',
+            '\\begin{cases}': '\\begin{cases} x & \\text{if } y > 0 \\\\ -x & \\text{otherwise} \\end{cases}',
+            '\\begin{rcases}': '\\begin{rcases} x \\\\ y \\end{rcases} \\Rightarrow z',
+            '\\begin{smallmatrix}': '\\begin{smallmatrix} x & y \\\\ z & w \\end{smallmatrix}',
+            '\\begin{subarray}{l}': '\\begin{subarray}{l} i < n \\\\ j < m \\end{subarray}',
+            '\\begin{equation}': '\\begin{equation} x + y = z \\end{equation}',
+            '\\begin{split}': '\\begin{split} x &= y + z \\\\ &= w \\end{split}',
+            '\\begin{align}': '\\begin{align} x &= y \\\\ z &= w \\end{align}',
+            '\\begin{gather}': '\\begin{gather} x = y \\\\ z = w \\end{gather}',
+            '\\begin{alignat}{2}': '\\begin{alignat}{2} x &= y &&+ z \\\\ w &= u &&+ v \\end{alignat}',
+            '\\begin{CD}': '\\begin{CD} A @>>> B \\\\ @VVV @VVV \\\\ C @>>> D \\end{CD}',
+            '\\begin{matrix*}[r]': '\\begin{matrix*}[r] -x & y \\\\ z & -w \\end{matrix*}',
+            '\\nonnumber': '\\nonumber',
+            '\\\\[distance]': '\\\\[1em]',
+            '\\cr[distance]': '\\cr[1em]',
+            
+            // HTML & Media
+            '\\includegraphics': '\\includegraphics[height=1em]{https://katex.org/img/khan-academy.png}',
+            '\\html': '\\text{HTML}',
+            
+            // Letters & Unicode
+            '\\Alpha': 'A',
+            '\\Beta': 'B',
+            
+            // Annotation
+            '\\text{\\sout{abc}}': '\\text{\\cancel{abc}}',
+            '\\overbracket{a+b+c}^{\\text{note}}': '\\overbrace{a+b+c}^{\\text{note}}',
+            '\\underbracket{a+b+c}_{\\text{note}}': '\\underbrace{a+b+c}_{\\text{note}}',
+            '\\phase{-78^\\circ}': '\\angle{-78^\\circ}',
+            '\\tag{hi} x+y^{2x}': '\\tag{hi} x+y^{2x}',
+            '\\tag*{hi} x+y^{2x}': '\\tag*{hi} x+y^{2x}'
         };
 
         // DOM에서 보정 대상 카드를 찾아서 속성과 텍스트 동적 수정
@@ -8125,30 +8195,15 @@
             const symbol = card.getAttribute('data-symbol');
             const previewBox = card.querySelector('.preview-box');
             try {
-                // If it's an environment or template command, use fallback text directly
-                if (symbol.includes('\\begin') || 
-                    symbol.includes('\\end') || 
-                    symbol.includes('\\def') || 
+                // macro definitions or invalid standalone components should use fallback text directly
+                if (symbol.includes('\\def') || 
                     symbol.includes('\\newcommand') || 
                     symbol.includes('\\let') || 
                     symbol.includes('\\futurelet') || 
-                    symbol.includes('\\global') || 
-                    symbol === '\\left' || 
-                    symbol === '\\right' || 
-                    symbol === '\\left.' || 
-                    symbol === '\\right.' || 
-                    symbol === '\\middle' ||
-                    symbol === '\\hdashline' ||
+                    symbol.includes('\\global') ||
+                    (symbol.startsWith('\\end{') && symbol.endsWith('}')) ||
                     symbol === '\\cr' ||
-                    symbol === '\\cline' ||
-                    symbol === '\\multicolumn' ||
-                    symbol === '\\Alpha' ||
-                    symbol === '\\Beta' ||
-                    symbol === '\\html' ||
-                    symbol.includes('\\htmlStyle') ||
-                    symbol.includes('\\htmlClass') ||
-                    symbol.includes('\\htmlId') ||
-                    symbol.includes('\\htmlData')) {
+                    symbol === '\\html') {
                     previewBox.innerHTML = `<span class="katex-fallback">${escapeHtml(symbol)}</span>`;
                     return;
                 }
@@ -8159,10 +8214,17 @@
                     renderStr = symbol + '}';
                 }
 
-                // Render with throwOnError: true to catch KaTeX syntax errors
+                // If symbol is a tag, enable display mode
+                let isDisplayMode = false;
+                if (symbol.includes('\\tag')) {
+                    isDisplayMode = true;
+                }
+
+                // Render with trust: true to support HTML and media commands
                 katex.render(renderStr, previewBox, {
                     throwOnError: true,
-                    displayMode: false
+                    displayMode: isDisplayMode,
+                    trust: true
                 });
             } catch (e) {
                 previewBox.innerHTML = `<span class="katex-fallback">${escapeHtml(symbol)}</span>`;
