@@ -19,11 +19,17 @@ def get_asset_path(relative_path):
 @app.route('/')
 def index():
     # frontend/index.html 정적 파일 서빙
+    response.set_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+    response.set_header("Pragma", "no-cache")
+    response.set_header("Expires", "0")
     return static_file("index.html", root=get_asset_path("frontend"))
 
 @app.route('/static/<filepath:path>')
 def serve_static(filepath):
     # frontend/static/ 내의 css, js 등 에셋 서빙
+    response.set_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+    response.set_header("Pragma", "no-cache")
+    response.set_header("Expires", "0")
     return static_file(filepath, root=get_asset_path("frontend/static"))
 
 @app.route('/workspace/<filepath:path>')

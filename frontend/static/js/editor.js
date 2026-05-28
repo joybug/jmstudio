@@ -2524,8 +2524,8 @@ class UndoManager {
                 document.body.appendChild(tooltip);
             }
 
-            // Unescape double backslashes back to single backslashes for KaTeX
-            const cleanMath = rawMath.replace(/\\+/g, '\\');
+            // Use rawMath directly (HTML data-raw-math attributes already contain clean LaTeX)
+            const cleanMath = rawMath;
 
             let rendered = '';
             try {
