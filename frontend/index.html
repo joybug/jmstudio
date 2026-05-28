@@ -476,8 +476,26 @@
                     </details>
                 </div>
 
-                <!-- 4. 컴공/AI 서브탭 콘텐츠 -->
                 <div class="math-subtab-content" id="math-subtab-content-cs" style="display: none; flex-direction: column; gap: 8px;">
+                    <!-- 0. 자주 쓰이는 연산자 -->
+                    <details class="math-section-accordion" data-section-id="cs_ops" open>
+                        <summary class="math-section-title">자주 쓰이는 연산자</summary>
+                        <div class="math-grid" style="grid-template-columns: repeat(3, 1fr) !important;">
+                            <button class="math-item" onclick="insertMathSymbol('$? \\odot ?$')" data-raw-math="\odot"><span>하다마르 곱</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$? \\cdot ?$')" data-raw-math="\cdot"><span>내적 (점곱)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\oplus$')" data-raw-math="\oplus"><span>비트 XOR</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$? \\otimes ?$')" data-raw-math="\otimes"><span>텐서곱</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$? \\bmod ?$')" data-raw-math="\bmod"><span>모듈로</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\lfloor ? \\rfloor$')" data-raw-math="\lfloor \rfloor"><span>바닥 함수</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\lceil ? \\rceil$')" data-raw-math="\lceil \rceil"><span>천장 함수</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\ll$')" data-raw-math="\ll"><span>L Shift (비트)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\gg$')" data-raw-math="\gg"><span>R Shift (비트)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\operatorname{argmax}_{?} ?$')" data-raw-math="\operatorname{argmax}"><span>Argmax</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\operatorname{argmin}_{?} ?$')" data-raw-math="\operatorname{argmin}"><span>Argmin</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\sum_{?}^{?} ?$')" data-raw-math="\sum"><span>합 (Sum)</span></button>
+                        </div>
+                    </details>
+
                     <!-- 1. 알고리즘 & 컴퓨터 과학 -->
                     <details class="math-section-accordion" data-section-id="algo_cs" open>
                         <summary class="math-section-title">알고리즘 & 컴퓨터 과학</summary>
