@@ -600,11 +600,13 @@ class MdViewerApi:
     def open_katex_support(self):
         global window
         try:
+            import time
+            t_stamp = int(time.time())
             cfg = get_config()
             theme = cfg.get("theme", "dark")
             webview.create_window(
                 title="KaTeX Supported Functions & Symbols",
-                url=f"http://127.0.0.1:{PORT}/katex_support?theme={theme}",
+                url=f"http://127.0.0.1:{PORT}/katex_support?theme={theme}&t={t_stamp}",
                 js_api=self,
                 width=950,
                 height=800,
@@ -613,6 +615,7 @@ class MdViewerApi:
             return {"status": "success"}
         except Exception as e:
             return {"status": "error", "message": str(e)}
+
 
     def insert_katex_symbol(self, symbol):
         global window
