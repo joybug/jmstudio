@@ -1558,7 +1558,10 @@ class UndoManager {
                 { value: 'deep_learning', label: '딥러닝' },
                 { value: 'info_theory', label: '정보이론' },
                 { value: 'comp_arch', label: '컴퓨터 구조' },
-                { value: 'cs_ops', label: '자주 쓰이는 연산자' }
+                { value: 'crypto', label: '암호학' },
+                { value: 'hash_integrity', label: '해시 함수 & 무결성' },
+                { value: 'net_security', label: '네트워크 보안' },
+                { value: 'info_security', label: '정보이론 기반' }
             ],
             ee: [
                 { value: 'ee_basic', label: '회로 및 신호이론' }
