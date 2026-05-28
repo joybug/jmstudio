@@ -1553,8 +1553,12 @@ class UndoManager {
                 { value: 'protein', label: '단백질 및 생화학' }
             ],
             cs: [
-                { value: 'probability', label: '확률 및 정보이론' },
-                { value: 'ml_dl', label: '머신러닝/딥러닝' }
+                { value: 'algo_cs', label: '알고리즘 & 컴퓨터 과학' },
+                { value: 'ml_ai', label: '머신러닝 & AI' },
+                { value: 'deep_learning', label: '딥러닝' },
+                { value: 'info_theory', label: '정보이론' },
+                { value: 'comp_arch', label: '컴퓨터 구조' },
+                { value: 'cs_ops', label: '자주 쓰이는 연산자' }
             ],
             ee: [
                 { value: 'ee_basic', label: '회로 및 신호이론' }

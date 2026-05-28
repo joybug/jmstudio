@@ -478,25 +478,66 @@
 
                 <!-- 4. 컴공/AI 서브탭 콘텐츠 -->
                 <div class="math-subtab-content" id="math-subtab-content-cs" style="display: none; flex-direction: column; gap: 8px;">
-                    <details class="math-section-accordion" data-section-id="probability" open>
-                        <summary class="math-section-title">확률 및 정보이론</summary>
+                    <details class="math-section-accordion" data-section-id="algo_cs" open>
+                        <summary class="math-section-title">알고리즘 & 컴퓨터 과학</summary>
                         <div class="math-grid">
-                            <button class="math-item" onclick="insertMathSymbol('$H(X) = -\\sum P(x_i)\\log P(x_i)$')" data-raw-math="H(X) = -\sum P(x_i)\log P(x_i)"><span data-i18n="math_label_entropy">샤논 엔트로피</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$P(A|B) = \\frac{P(B|A)P(A)}{P(B)}$')" data-raw-math="P(A|B) = \frac{P(B|A)P(A)}{P(B)}"><span data-i18n="math_label_bayes">베이즈 정리</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$D_{\\text{KL}}(P \\parallel Q) = \\sum P(x) \\log \\frac{P(x)}{Q(x)}$')" data-raw-math="KL divergence"><span>KL 발산</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$f(x) = \\frac{1}{\\sigma \\sqrt{2\\pi}} e^{-\\frac{1}{2}(\\frac{x-\\mu}{\\sigma})^2}$')" data-raw-math="Gaussian distribution"><span>가우시안 분포</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$O(n \\log n)$')" data-raw-math="O(n \log n)"><span>시간 복잡도 (Big-O)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$T(n) = a T\\left(\\frac{n}{b}\\right) + f(n)$')" data-raw-math="T(n) = a T(n/b) + f(n)"><span>알고리즘 성능분석</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$O(\\log n)$')" data-raw-math="O(\log n)"><span>이진탐색 시간복잡도</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$P(\\text{collision}) \\approx 1 - e^{-\\frac{k(k-1)}{2N}}$')" data-raw-math="collision probability"><span>해시 충돌 확률</span></button>
                         </div>
                     </details>
 
-                    <details class="math-section-accordion" data-section-id="ml_dl" open>
-                        <summary class="math-section-title">머신러닝/딥러닝</summary>
+                    <details class="math-section-accordion" data-section-id="ml_ai" open>
+                        <summary class="math-section-title">머신러닝 & AI</summary>
                         <div class="math-grid">
-                            <button class="math-item" onclick="insertMathSymbol('$\\sigma(\\vec{z})_i = \\frac{e^{z_i}}{\\sum e^{z_j}}$')" data-raw-math="\sigma(\vec{z})_i = \frac{e^{z_i}}{\sum e^{z_j}}"><span data-i18n="math_label_softmax">소프트맥스</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$S(x) = \\frac{1}{1 + e^{-x}}$')" data-raw-math="S(x) = \frac{1}{1 + e^{-x}}"><span data-i18n="math_label_sigmoid">시그모이드</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$f(x) = \\max(0, x)$')" data-raw-math="f(x) = \max(0, x)"><span data-i18n="math_label_relu">ReLU</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$L = -\\sum y_i \\log \\hat{y}_i$')" data-raw-math="L = -\sum y_i \log \hat{y}_i"><span data-i18n="math_label_cross_entropy">크로스 엔트로피</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\theta = \\theta - \\eta \\nabla_\\theta L$')" data-raw-math="\theta = \theta - \eta \nabla_\theta L"><span data-i18n="math_label_grad_descent">경사 하강법</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$w_{t+1} = w_t - \\eta \\frac{\\partial L}{\\partial w}$')" data-raw-math="weight update"><span>가중치 업데이트</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$y = \\mathbf{w}^T \\mathbf{x} + b$')" data-raw-math="y = w^T x + b"><span>선형 회귀 (Linear)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$P(y=1|\\mathbf{x}) = \\frac{1}{1 + e^{-(\\mathbf{w}^T \\mathbf{x} + b)}}$')" data-raw-math="logistic regression"><span>로지스틱 회귀</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\text{MSE} = \\frac{1}{n} \\sum_{i=1}^n (y_i - \\hat{y}_i)^2$')" data-raw-math="Mean Squared Error"><span>평균제곱오차(MSE)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$L = -\\sum_i y_i \\log \\hat{y}_i$')" data-raw-math="cross entropy loss"><span>크로스 엔트로피 손실</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\sigma(\\mathbf{z})_i = \\frac{e^{z_i}}{\\sum_j e^{z_j}}$')" data-raw-math="softmax function"><span>Softmax 함수</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\theta_{t+1} = \\theta_t - \\eta \\nabla_\\theta L$')" data-raw-math="gradient descent"><span>경사하강법</span></button>
+                        </div>
+                    </details>
+
+                    <details class="math-section-accordion" data-section-id="deep_learning" open>
+                        <summary class="math-section-title">딥러닝</summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$y = f\\left(\\sum w_i x_i + b\\right)$')" data-raw-math="perceptron output"><span>퍼셉트론 출력</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$f(x) = \\max(0, x)$')" data-raw-math="ReLU function"><span>ReLU 활성화함수</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\sigma(x) = \\frac{1}{1 + e^{-x}}$')" data-raw-math="sigmoid function"><span>Sigmoid 활성화</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\mathbf{h}_d = \\mathbf{h} \\odot \\mathbf{m}, \\quad m_i \\sim \\text{Bernoulli}(p)$')" data-raw-math="dropout mask"><span>Dropout 확률</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\frac{\\partial L}{\\partial w_{ij}} = \\delta_j x_i$')" data-raw-math="backpropagation gradient"><span>역전파 (오차)</span></button>
+                        </div>
+                    </details>
+
+                    <details class="math-section-accordion" data-section-id="info_theory" open>
+                        <summary class="math-section-title">정보이론</summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$H(X) = -\\sum P(x_i) \\log_2 P(x_i)$')" data-raw-math="Shannon entropy"><span>샤논 엔트로피</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$C = B \\log_2 \\left( 1 + \\frac{S}{N} \\right)$')" data-raw-math="channel capacity"><span>채널 용량</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$D_{\\text{KL}}(P \\parallel Q) = \\sum P(x) \\log \\frac{P(x)}{Q(x)}$')" data-raw-math="KL divergence"><span>KL 발산</span></button>
+                        </div>
+                    </details>
+
+                    <details class="math-section-accordion" data-section-id="comp_arch" open>
+                        <summary class="math-section-title">컴퓨터 구조</summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$\\text{CPU Time} = \\text{IC} \\times \\text{CPI} \\times \\text{Clock Cycle Time}$')" data-raw-math="CPU execution time"><span>CPU 성능공식</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$S = \\frac{1}{(1-p) + \\frac{p}{s}}$')" data-raw-math="Amdahl's law"><span>Amdahl의 법칙</span></button>
+                        </div>
+                    </details>
+
+                    <details class="math-section-accordion" data-section-id="cs_ops" open>
+                        <summary class="math-section-title">자주 쓰이는 연산자</summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$? \\odot ?$')" data-raw-math="\odot"><span>하다마르 곱 (원소)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$? \\cdot ?$')" data-raw-math="\cdot"><span>내적 (점곱)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\lfloor ? \\rfloor$')" data-raw-math="\lfloor \rfloor"><span>바닥 함수 (Floor)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\lceil ? \\rceil$')" data-raw-math="\lceil \rceil"><span>천장 함수 (Ceiling)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$a \\bmod n$')" data-raw-math="\bmod"><span>모듈로 (Modulo)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\operatorname{argmax}_{?} ?$')" data-raw-math="\operatorname{argmax}"><span>Argmax</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\operatorname{argmin}_{?} ?$')" data-raw-math="\operatorname{argmin}"><span>Argmin</span></button>
                         </div>
                     </details>
                 </div>
