@@ -41,7 +41,7 @@ echo.
 echo [Step 3] Compiling jmstudio.py into a Standalone Executable...
 echo (This may take 1-2 minutes. Please do not close this window...)
 
-rem app_config.py에서 버전 정보 추출 (예: v3.8.7)
+rem app_config.py에서 버전 정보 추출 (예: v3.8.8)
 for /f "tokens=2 delims=v" %%a in ('findstr /C:"APP_NAME =" app_config.py') do (
     set TMP_VER=%%a
 )

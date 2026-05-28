@@ -1,4 +1,4 @@
-# 🧪 Joy Markdown Studio v3.8.7 🌟
+# 🧪 Joy Markdown Studio v3.8.8 🌟
 
 > **The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio**  
 > A premium desktop markdown creator application crafted with Python (`PyWebView` + `Bottle`) and modern Vanilla CSS/JS.
@@ -12,12 +12,13 @@
 
 ## ✨ Key Features
 
-### 1. 📝 CodeMirror 6 Editor Core & Full Modularization (v3.8.7 New)
+### 1. 📝 CodeMirror 6 Editor Core & Full Modularization (v3.8.8 New)
 * **High-Speed Modern Editor Engine**: Replaced the standard textarea with the high-performance CodeMirror 6 engine. It provides a fast and stable typing environment even with massive markdown documents.
 * **Maximizing Coding Productivity**: Packed with essential coding assists such as auto-close brackets, robust undo/redo history, and custom shortcuts found in modern editors.
 
 ### 2. 📐 Academic Math Helper (KaTeX Integration)
 * **Real-time Formula Rendering**: Equipped with a fast and accurate KaTeX engine to render inline math (`$...$`) and block math (`$$...$$`) seamlessly.
+* **Electrical & Electronics (EE) Subtab Revamp (v3.8.8 New)**: Revamped the Electrical/Electronics subtab into 6 clear subdivisions (Basic Operators, Circuit Theory, Electromagnetics, Signals & Systems, Semiconductor Physics, Control Engineering) with 3-column unified grid, and fixed math preview tooltips by resolving LaTeX escaping.
 * **Three Science & Engineering Tabbed Helper Panels**: 
   * **Math (📐)**: One-click insertion of fractions, roots, calculus, limits, Greek letters, and key symbols.
   * **Physics (⚛️)**: Provides essential formulas such as Coulomb's law, universal gravitation, Schrödinger's equation, Lorentz force, etc.
