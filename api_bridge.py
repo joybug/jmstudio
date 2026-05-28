@@ -628,3 +628,21 @@ class MdViewerApi:
         except Exception as e:
             return {"status": "error", "message": str(e)}
 
+    def get_external_math_db(self):
+        try:
+            import sys
+            if hasattr(sys, 'frozen'):
+                exe_dir = os.path.dirname(sys.executable)
+            else:
+                exe_dir = os.path.abspath(".")
+            
+            db_path = os.path.normpath(os.path.join(exe_dir, "math_db.json"))
+            if os.path.exists(db_path) and os.path.isfile(db_path):
+                with open(db_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                return {"status": "success", "data": data}
+            return {"status": "not_found"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+

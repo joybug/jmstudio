@@ -707,6 +707,22 @@ class UndoManager {
                 
                 renderFileTree(state.files);
                 
+                // 실행파일 경로의 external math_db.json 존재 여부 확인 및 로드
+                try {
+                    const extDbRes = await pywebview.api.get_external_math_db();
+                    if (extDbRes && extDbRes.status === 'success') {
+                        mathDatabase = extDbRes.data;
+                        hasExternalMathDb = true;
+                        console.log('External math database loaded successfully from executable directory.');
+                    } else {
+                        hasExternalMathDb = false;
+                        console.log('No external math database found in executable directory. Using default.');
+                    }
+                } catch (dbErr) {
+                    console.warn('Failed to load external math_db.json:', dbErr);
+                    hasExternalMathDb = false;
+                }
+                
                 // last_file이 있으면 열기 (실패해도 스플래시는 반드시 숨김)
                 if (state.last_file) {
                     try {
@@ -1514,6 +1530,7 @@ class UndoManager {
         }
 
         let mathDatabase = [];
+        let hasExternalMathDb = false;
 
         // 비동기 수식 DB 로드
         fetch('/static/data/math_db.json')
@@ -1599,6 +1616,8 @@ class UndoManager {
             const activeContent = document.getElementById(`math-subtab-content-${subtabId}`);
             if (!activeContent) return;
             
+            let totalStaticMatches = 0;
+
             // 1. 기존 정적 DOM 수식 항목 필터링
             const sections = activeContent.querySelectorAll('.math-section, details.math-section-accordion');
             sections.forEach(section => {
@@ -1628,6 +1647,7 @@ class UndoManager {
                     if (section.tagName === 'DETAILS' && query) {
                         section.open = true;
                     }
+                    totalStaticMatches += sectionMatchCount;
                 } else {
                     section.style.display = 'none';
                 }
@@ -1639,7 +1659,10 @@ class UndoManager {
                 existingExtended.remove();
             }
             
-            if (query && mathDatabase.length > 0) {
+            // 실행파일 경로에 math_db.json이 존재하는 경우(hasExternalMathDb = true)에는 기본검색에서 매칭된 결과가 없을 때(totalStaticMatches === 0)만 검색되도록 설정
+            const shouldSearchDb = query && mathDatabase.length > 0 && (!hasExternalMathDb || totalStaticMatches === 0);
+            
+            if (shouldSearchDb) {
                 // 현재 분야에 매칭되고 쿼리에 부합하는 항목 필터링
                 const matchedDbItems = mathDatabase.filter(item => {
                     if (item.category !== subtabId) return false;
