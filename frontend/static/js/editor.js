@@ -1123,13 +1123,13 @@ class UndoManager {
         function maskLaTeX(text) {
             mathBlocks = [];
             // 1. Block 수식 ($$수식$$) 마스킹
-            text = text.replace(/\\$\\$([\\s\\S]+?)\\$\\$/g, (match, math) => {
+            text = text.replace(/\$\$([\s\S]+?)\$\$/g, (match, math) => {
                 const placeholder = `%%BLOCK_MATH_${mathBlocks.length}%%`;
                 mathBlocks.push({ id: placeholder, math: math.trim(), block: true });
                 return placeholder;
             });
             // 2. Inline 수식 ($수식$) 마스킹
-            text = text.replace(/\\$([^\\$\\n\\r]+?)\\$/g, (match, math) => {
+            text = text.replace(/\$([^\$\n\r]+?)\$/g, (match, math) => {
                 const placeholder = `%%INLINE_MATH_${mathBlocks.length}%%`;
                 mathBlocks.push({ id: placeholder, math: math.trim(), block: false });
                 return placeholder;
@@ -2330,7 +2330,7 @@ class UndoManager {
             }
 
             // Unescape double backslashes back to single backslashes for KaTeX
-            const cleanMath = rawMath.replace(/\\\\+/g, '\\\\');
+            const cleanMath = rawMath.replace(/\\+/g, '\\');
 
             let rendered = '';
             try {
