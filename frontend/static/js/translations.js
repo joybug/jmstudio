@@ -220,6 +220,10 @@ const translations = {
                 "settings_password": "웹 접속 암호",
                 "placeholder_password_empty": "미지정 시 로그인 없이 접속",
                 "settings_warn": "호스트/포트 변경은 앱 재시작 후 적용. 암호 변경은 즉시 적용.",
+                "settings_font_title": "글꼴 및 에디터 설정",
+                "settings_ui_font": "기본 UI 글꼴",
+                "settings_editor_font": "에디터 글꼴",
+                "settings_editor_size": "에디터 글자 크기 (px)",
                 
                 // Auth Overlay
                 "auth_desc": "접속 암호를 입력해 주세요.",
@@ -539,6 +543,10 @@ const translations = {
                 "settings_password": "Web Access Password",
                 "placeholder_password_empty": "Leave blank for no password",
                 "settings_warn": "Host/port changes apply after restart. Password changes apply immediately.",
+                "settings_font_title": "Font & Editor Settings",
+                "settings_ui_font": "Default UI Font",
+                "settings_editor_font": "Editor Font",
+                "settings_editor_size": "Editor Font Size (px)",
                 
                 // Auth Overlay
                 "auth_desc": "Please enter the access password.",

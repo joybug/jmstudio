@@ -103,7 +103,42 @@ class UndoManager {
         let isCreatingType = "file"; // 'file' or 'folder'
         let workspaceRoot = "";
         let currentNetworkConfig = { bind_ip: '0.0.0.0', port: 58220, access_password: '', local_ip: '127.0.0.1' };
+        let currentFontConfig = { ui_font: 'Inter', editor_font: 'Fira Code', editor_font_size: 14 };
 
+        function applyFontSettings(uiFont, editorFont, editorSize) {
+            currentFontConfig.ui_font = uiFont || 'Inter';
+            currentFontConfig.editor_font = editorFont || 'Fira Code';
+            currentFontConfig.editor_font_size = parseInt(editorSize) || 14;
+
+            let styleTag = document.getElementById('custom-font-settings');
+            if (!styleTag) {
+                styleTag = document.createElement('style');
+                styleTag.id = 'custom-font-settings';
+                document.head.appendChild(styleTag);
+            }
+
+            let uiFontFamily = currentFontConfig.ui_font;
+            if (uiFontFamily !== 'sans-serif' && uiFontFamily !== 'system-ui') {
+                uiFontFamily = `"${uiFontFamily}"`;
+            }
+
+            let editorFontFamily = currentFontConfig.editor_font;
+            if (editorFontFamily !== 'monospace') {
+                editorFontFamily = `"${editorFontFamily}"`;
+            }
+
+            styleTag.textContent = `
+                body, button, input, select, textarea {
+                    font-family: ${uiFontFamily}, sans-serif !important;
+                }
+                .cm-editor, .cm-scroller, .cm-gutters, pre, code {
+                    font-family: ${editorFontFamily}, monospace !important;
+                }
+                .cm-editor, .cm-editor .cm-scroller, .cm-editor .cm-gutters {
+                    font-size: ${currentFontConfig.editor_font_size}px !important;
+                }
+            `;
+        }
 
         function t(key) {
             if (translations[currentLang] && translations[currentLang][key]) {
@@ -287,6 +322,12 @@ class UndoManager {
         };
 
         async function startApp() {
+            // Apply fonts from localStorage immediately to prevent FOUT (Flash of Unstyled Text)
+            const savedUiFont = localStorage.getItem('ui_font') || 'Inter';
+            const savedEditorFont = localStorage.getItem('editor_font') || 'Fira Code';
+            const savedEditorSize = localStorage.getItem('editor_font_size') || 14;
+            applyFontSettings(savedUiFont, savedEditorFont, savedEditorSize);
+
             initCodeMirror();
 
             if (window.pywebview) {
@@ -329,6 +370,7 @@ class UndoManager {
                                 else if (prop === 'save_theme') { bodyData.theme_name = args[0]; }
                                 else if (prop === 'save_lang') { bodyData.lang = args[0]; }
                                 else if (prop === 'save_network_settings') { bodyData.bind_ip = args[0]; bodyData.port = args[1]; bodyData.access_password = args[2]; }
+                                else if (prop === 'save_font_settings') { bodyData.ui_font = args[0]; bodyData.editor_font = args[1]; bodyData.editor_font_size = args[2]; }
                                 else if (prop === 'export_html') { bodyData.rel_path = args[0]; bodyData.html_body = args[1]; bodyData.title = args[2]; }
                                 else if (prop === 'save_graph_image') { bodyData.base64_data = args[0]; }
                                 
@@ -689,6 +731,16 @@ class UndoManager {
                 currentNetworkConfig.port = state.port || 58220;
                 currentNetworkConfig.access_password = state.access_password || '';
                 currentNetworkConfig.local_ip = state.local_ip || '127.0.0.1';
+
+                // 글꼴 설정 저장 및 적용
+                const uiFont = state.ui_font || 'Inter';
+                const editorFont = state.editor_font || 'Fira Code';
+                const editorSize = state.editor_font_size || 14;
+                applyFontSettings(uiFont, editorFont, editorSize);
+                
+                localStorage.setItem('ui_font', uiFont);
+                localStorage.setItem('editor_font', editorFont);
+                localStorage.setItem('editor_font_size', editorSize);
 
                 workspaceRoot = state.workspace;
                 currentTheme = state.theme;
@@ -2498,6 +2550,11 @@ class UndoManager {
             const publicIpEl = document.getElementById('settings-public-ip');
             publicIpEl.innerText = t('settings_retrieving');
             
+            // 글꼴 설정 표시
+            document.getElementById('settings-ui-font').value = currentFontConfig.ui_font;
+            document.getElementById('settings-editor-font').value = currentFontConfig.editor_font;
+            document.getElementById('settings-editor-size').value = currentFontConfig.editor_font_size;
+            
             fetch('https://api.ipify.org?format=json')
                 .then(res => res.json())
                 .then(data => {
@@ -2524,18 +2581,36 @@ class UndoManager {
             const bindIp = document.getElementById('settings-bind-ip').value;
             const port = parseInt(document.getElementById('settings-port').value) || 58220;
             const accessPassword = document.getElementById('settings-password').value;
+
+            const uiFont = document.getElementById('settings-ui-font').value;
+            const editorFont = document.getElementById('settings-editor-font').value;
+            const editorSize = parseInt(document.getElementById('settings-editor-size').value) || 14;
+
             try {
-                const res = await pywebview.api.save_network_settings(bindIp, port, accessPassword);
-                if (res.status === 'success') {
-                    currentNetworkConfig.bind_ip = bindIp;
-                    currentNetworkConfig.port = port;
-                    currentNetworkConfig.access_password = accessPassword;
-                    localStorage.setItem('access_password', accessPassword);
-                    showToast(t('msg_settings_saved'));
-                    closeSettingsModal();
-                } else {
-                    alert(t('msg_settings_failed') + res.message);
+                const resNetwork = await pywebview.api.save_network_settings(bindIp, port, accessPassword);
+                if (resNetwork.status !== 'success') {
+                    alert(t('msg_settings_failed') + resNetwork.message);
+                    return;
                 }
+
+                const resFont = await pywebview.api.save_font_settings(uiFont, editorFont, editorSize);
+                if (resFont.status !== 'success') {
+                    alert(t('msg_settings_failed') + resFont.message);
+                    return;
+                }
+
+                currentNetworkConfig.bind_ip = bindIp;
+                currentNetworkConfig.port = port;
+                currentNetworkConfig.access_password = accessPassword;
+                localStorage.setItem('access_password', accessPassword);
+
+                applyFontSettings(uiFont, editorFont, editorSize);
+                localStorage.setItem('ui_font', uiFont);
+                localStorage.setItem('editor_font', editorFont);
+                localStorage.setItem('editor_font_size', editorSize);
+
+                showToast(t('msg_settings_saved'));
+                closeSettingsModal();
             } catch (err) {
                 alert(t('msg_settings_err') + err.message);
             }

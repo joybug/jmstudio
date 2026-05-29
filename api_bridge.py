@@ -3,7 +3,10 @@ import json
 import webview
 import socket
 import urllib.parse
-from app_config import get_config, save_config, PORT, BIND_IP
+from app_config import (
+    get_config, save_config, PORT, BIND_IP,
+    DEFAULT_UI_FONT, DEFAULT_EDITOR_FONT, DEFAULT_EDITOR_FONT_SIZE
+)
 from gdrive_sync import GoogleDriveSync
 
 # 전역 window 레퍼런스 (main.py에서 주입)
@@ -53,7 +56,10 @@ class MdViewerApi:
             "port": cfg.get("port", PORT),
             "bind_ip": cfg.get("bind_ip", BIND_IP),
             "access_password": cfg.get("access_password", ""),
-            "local_ip": get_local_ip()
+            "local_ip": get_local_ip(),
+            "ui_font": cfg.get("ui_font", DEFAULT_UI_FONT),
+            "editor_font": cfg.get("editor_font", DEFAULT_EDITOR_FONT),
+            "editor_font_size": cfg.get("editor_font_size", DEFAULT_EDITOR_FONT_SIZE)
         }
 
     def save_network_settings(self, bind_ip, port, access_password):
@@ -62,6 +68,17 @@ class MdViewerApi:
             cfg["bind_ip"] = bind_ip
             cfg["port"] = int(port)
             cfg["access_password"] = access_password.strip()
+            save_config(cfg)
+            return {"status": "success"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    def save_font_settings(self, ui_font, editor_font, editor_font_size):
+        try:
+            cfg = get_config()
+            cfg["ui_font"] = ui_font
+            cfg["editor_font"] = editor_font
+            cfg["editor_font_size"] = int(editor_font_size)
             save_config(cfg)
             return {"status": "success"}
         except Exception as e:

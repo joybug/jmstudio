@@ -25,3 +25,8 @@ config = get_config()
 APP_NAME = "Joy Markdown Studio v3.9.1"
 PORT = int(config.get("port", 58220))
 BIND_IP = config.get("bind_ip", "0.0.0.0")
+
+DEFAULT_UI_FONT = "Inter"
+DEFAULT_EDITOR_FONT = "Fira Code"
+DEFAULT_EDITOR_FONT_SIZE = 14
+

@@ -1068,6 +1068,41 @@
                     <input type="password" id="settings-password" class="modal-input" placeholder="미지정 시 로그인 없이 접속" style="width: 100%; box-sizing: border-box;" data-i18n-placeholder="placeholder_password_empty">
                 </div>
             </div>
+            
+            <!-- 글꼴 및 편집기 설정 -->
+            <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-top: 10px; width: 100%;">
+                <i data-lucide="type" style="width: 18px; height: 18px; color: var(--accent);"></i>
+                <div class="modal-title" style="margin: 0; font-size: 1.1em;" data-i18n="settings_font_title">글꼴 및 에디터 설정</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 16px; width: 100%;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%;">
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-size: 0.85em; font-weight: 600; color: var(--text-main);" data-i18n="settings_ui_font">기본 UI 글꼴</label>
+                        <select id="settings-ui-font" class="modal-input" style="width: 100%; box-sizing: border-box;">
+                            <option value="Inter">Inter (기본)</option>
+                            <option value="Outfit">Outfit</option>
+                            <option value="Malgun Gothic">맑은 고딕</option>
+                            <option value="Nanum Gothic">나눔고딕</option>
+                            <option value="sans-serif">System Default</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-size: 0.85em; font-weight: 600; color: var(--text-main);" data-i18n="settings_editor_font">에디터 글꼴</label>
+                        <select id="settings-editor-font" class="modal-input" style="width: 100%; box-sizing: border-box;">
+                            <option value="Fira Code">Fira Code (기본)</option>
+                            <option value="Consolas">Consolas</option>
+                            <option value="D2Coding">D2Coding</option>
+                            <option value="Courier New">Courier New</option>
+                            <option value="monospace">System Monospace</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label style="font-size: 0.85em; font-weight: 600; color: var(--text-main);" data-i18n="settings_editor_size">에디터 글자 크기 (px)</label>
+                    <input type="number" id="settings-editor-size" class="modal-input" placeholder="14" style="width: 100%; box-sizing: border-box;" min="12" max="24">
+                </div>
+            </div>
+
             <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); border-radius: 6px; padding: 10px; font-size: 0.78em; color: #f87171; line-height: 1.4;" data-i18n="settings_warn">
                 호스트/포트 변경은 앱 재시작 후 적용. 암호 변경은 즉시 적용.
             </div>
