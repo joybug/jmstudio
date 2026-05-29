@@ -178,12 +178,17 @@ class GoogleDriveSync:
 
         try:
             if file_id:
-                file = self.service.files().update(
-                    fileId=file_id,
-                    media_body=media
-                ).execute()
-                return file_id
-            else:
+                try:
+                    file = self.service.files().update(
+                        fileId=file_id,
+                        media_body=media
+                    ).execute()
+                    return file_id
+                except Exception as e:
+                    # 기존 file_id가 새로운 계정/프로젝트에 존재하지 않는 경우(예: 404), None으로 리셋하고 재생성/재조회로 폴백
+                    file_id = None
+            
+            if not file_id:
                 # 중복 생성 방지를 위해 이름으로 재검색
                 query = f"name = '{filename}' and '{folder_id}' in parents and trashed = false"
                 results = self.service.files().list(q=query, spaces='drive', fields="files(id, name)").execute()
