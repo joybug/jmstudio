@@ -176,6 +176,10 @@ While both **Joy Markdown Studio (JM-STUDIO)** and **Obsidian** are powerful loc
 * **Obsidian**: Printing PDFs with dark themes can be cumbersome and wastes ink.
 * **JM-STUDIO**: When printing from Dark Mode, JM-STUDIO intelligently **auto-renders a high-contrast white theme in 0.1 seconds** just for the PDF export to save ink and maximize readability, instantly reverting to Dark Mode afterward. It also supports zero-dependency Standalone HTML exports, allowing you to share a single file with colleagues that looks identical to the app.
 
+### 6. ☁️ One-Click Bidirectional Google Drive Sync
+* **Obsidian**: Requires a paid subscription (Obsidian Sync, $8–$10/month) for real-time cloud sync, or complex configurations with community plugins (like Remotely Save) and third-party cloud accounts.
+* **JM-STUDIO**: Includes a **built-in Google Drive sync engine** out of the box. Users can connect to Google Drive with a single click via OAuth login. It supports automatic sync on save, modification time (mtime) conflict resolution, and remote cloud library browsing to download and import notes onto a new machine instantly.
+
 > **💡 In Summary:**
 > If Obsidian is a "universal diary where you build your own notes using Lego blocks," **Joy Markdown Studio is a "fully-loaded premium research studio designed so scientists and researchers can dive straight into their work with zero setup!"**
 
