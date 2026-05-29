@@ -32,11 +32,8 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Step 3: Extract version from jmstudio.py
-echo ""
-echo "[Step 3] Extracting version from jmstudio.py..."
 # APP_NAME = "Joy Markdown Studio v3.61" 라인에서 버전만 추출
-APP_VER=$(grep "APP_NAME =" jmstudio.py | sed -E "s/.*v([0-9.]+).*/\1/")
+APP_VER=$(grep "APP_NAME =" app_config.py | sed -E "s/.*v([0-9.]+).*/\1/")
 if [ -z "$APP_VER" ]; then
     APP_VER="unknown"
 fi

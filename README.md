@@ -1,4 +1,4 @@
-# 🧪 Joy Markdown Studio v3.9.1 🌟
+# 🧪 Joy Markdown Studio v3.9.2 🌟
 
 > **The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio**  
 > A premium desktop markdown creator application crafted with Python (`PyWebView` + `Bottle`) and modern Vanilla CSS/JS.
@@ -71,6 +71,13 @@
 * **Remote File Browser & Import**: View markdown documents safely stored in your Google Drive cloud workspace. Import any file that is not yet locally registered with a single click.
 * **Custom Credentials Override**: If you wish to use your own private GCP project keys, you can easily load your custom client_secrets.json file directly through the in-app setup guide dialog.
 * **How to Obtain Private Credentials**: Detailed step-by-step instructions on generating and downloading your own `client_secrets.json` from the Google Cloud Console can be found in the [Google Drive API Connection Key Setup Guide](file:///e:/jm_studio/doc/google_drive_api_setup_guide_en.md) document.
+
+### 12. 🎨 UI & Editor Font Customization (v3.9.2 New)
+* **Custom UI & Preview Fonts**: Easily change the typography of the entire application interface and markdown preview area. Choose from modern sans-serif fonts like `Inter` and `Outfit`, elegant serif fonts like `Lora` (ideal for academic reading), or use system defaults.
+* **Professional Coding Fonts**: Select from popular developer monospaced fonts including `Fira Code` (with beautiful ligatures), `JetBrains Mono` (the highest readability coding font), `Consolas`, `D2Coding` (popular Korean coding font), `Courier New`, or system monospace fallbacks.
+* **Dynamic Editor Font Size**: Control the text size of the editor dynamically with range bounds from 12px to 24px (default is 14px).
+* **Instant Dynamic CSS Injection**: All font changes apply instantly in real time via `<style>` tag updates without reloading or restarting the app.
+* **Seamless Settings Sync**: Configured fonts are saved in browser `localStorage` for immediate styling on startup and synchronized to the backend `md_viewer_config.json` for persistence.
 
 ---
 
