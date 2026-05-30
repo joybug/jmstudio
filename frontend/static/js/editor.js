@@ -3567,6 +3567,436 @@ window.downloadRemoteFile = downloadRemoteFile;
 window.closeUpdateModal = closeUpdateModal;
 window.copyPipCommand = copyPipCommand;
 
+let activeTagFilter = null;
+let modalEditedTags = [];
+
+async function loadWorkspaceTags() {
+    if (!window.pywebview) return;
+    try {
+        const res = await pywebview.api.get_workspace_tags();
+        if (res.status === 'success') {
+            renderTagsCloud(res.tags);
+            renderFilteredFiles(res.tags);
+        }
+    } catch (err) {
+        console.error("Error loading workspace tags:", err);
+    }
+}
+
+function renderTagsCloud(tagsMap) {
+    const container = document.getElementById('tags-list-container');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    const tags = Object.keys(tagsMap);
+    if (tags.length === 0) {
+        container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.85em; width: 100%; text-align: center;">${t('tags_no_tags')}</span>`;
+        return;
+    }
+
+    tags.sort().forEach(tag => {
+        const count = tagsMap[tag].length;
+        const tagEl = document.createElement('span');
+        tagEl.className = 'tag-cloud-item';
+        tagEl.style.cursor = 'pointer';
+        tagEl.style.padding = '4px 8px';
+        tagEl.style.borderRadius = '12px';
+        tagEl.style.fontSize = '0.8em';
+        tagEl.style.fontWeight = '500';
+        tagEl.style.display = 'inline-flex';
+        tagEl.style.alignItems = 'center';
+        tagEl.style.gap = '4px';
+        tagEl.style.transition = 'all 0.2s';
+        
+        if (activeTagFilter === tag) {
+            tagEl.style.background = 'var(--accent)';
+            tagEl.style.color = '#000000';
+            tagEl.style.border = '1px solid var(--accent)';
+        } else {
+            tagEl.style.background = 'rgba(255, 255, 255, 0.05)';
+            tagEl.style.color = 'var(--text-main)';
+            tagEl.style.border = '1px solid var(--border)';
+        }
+        
+        tagEl.innerHTML = `#${tag} <span style="font-size: 0.85em; opacity: 0.6;">(${count})</span>`;
+        tagEl.onclick = () => {
+            filterFilesByTag(tag);
+        };
+        
+        tagEl.onmouseover = () => {
+            if (activeTagFilter !== tag) {
+                tagEl.style.borderColor = 'var(--accent)';
+                tagEl.style.color = 'var(--accent)';
+                tagEl.style.background = 'rgba(69, 243, 255, 0.05)';
+            }
+        };
+        tagEl.onmouseout = () => {
+            if (activeTagFilter !== tag) {
+                tagEl.style.background = 'rgba(255, 255, 255, 0.05)';
+                tagEl.style.color = 'var(--text-main)';
+                tagEl.style.borderColor = 'var(--border)';
+            }
+        };
+        
+        container.appendChild(tagEl);
+    });
+}
+
+function renderFilteredFiles(tagsMap) {
+    const container = document.getElementById('filtered-files-container');
+    const clearBtn = document.getElementById('clear-tag-filter-btn');
+    const titleEl = document.getElementById('filtered-tags-title');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    if (!activeTagFilter) {
+        if (clearBtn) clearBtn.style.display = 'none';
+        if (titleEl) titleEl.innerText = t('tags_filtered_files');
+        container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.85em; width: 100%; text-align: center; padding: 10px;">태그를 선택하여 파일을 필터링하세요.</span>`;
+        return;
+    }
+    
+    if (clearBtn) clearBtn.style.display = 'inline-block';
+    if (titleEl) titleEl.innerText = `${t('tags_filtered_files')} (#${activeTagFilter})`;
+    
+    const files = tagsMap[activeTagFilter] || [];
+    if (files.length === 0) {
+        container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.85em; width: 100%; text-align: center; padding: 10px;">이 태그에 속한 파일이 없습니다.</span>`;
+        return;
+    }
+    
+    files.forEach(f => {
+        const itemEl = document.createElement('div');
+        itemEl.style.display = 'flex';
+        itemEl.style.alignItems = 'center';
+        itemEl.style.justifyContent = 'space-between';
+        itemEl.style.padding = '8px 10px';
+        itemEl.style.background = 'rgba(255,255,255,0.02)';
+        itemEl.style.border = '1px solid var(--border)';
+        itemEl.style.borderRadius = '6px';
+        itemEl.style.fontSize = '0.82em';
+        itemEl.style.cursor = 'pointer';
+        itemEl.style.transition = 'all 0.2s';
+        
+        itemEl.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px; width: 100%; overflow: hidden;">
+                <i data-lucide="file-text" style="width: 14px; height: 14px; color: var(--accent); flex-shrink: 0;"></i>
+                <span style="font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-main);">${f.name}</span>
+            </div>
+        `;
+        
+        itemEl.onclick = () => {
+            openFile(f.path);
+        };
+        
+        itemEl.onmouseover = () => {
+            itemEl.style.borderColor = 'var(--accent)';
+            itemEl.style.background = 'rgba(69, 243, 255, 0.05)';
+        };
+        itemEl.onmouseout = () => {
+            itemEl.style.borderColor = 'var(--border)';
+            itemEl.style.background = 'rgba(255,255,255,0.02)';
+        };
+        
+        container.appendChild(itemEl);
+    });
+    if (window.lucide) lucide.createIcons();
+}
+
+function filterFilesByTag(tag) {
+    if (activeTagFilter === tag) {
+        activeTagFilter = null;
+    } else {
+        activeTagFilter = tag;
+    }
+    loadWorkspaceTags();
+}
+
+function clearTagFilter() {
+    activeTagFilter = null;
+    loadWorkspaceTags();
+}
+
+function getActiveDocumentTags() {
+    const content = getEditorContent();
+    if (!content.startsWith('---')) return [];
+    
+    const fmMatch = content.match(/^---[\s\S]*?\r?\n---(\r?\n)?/);
+    if (!fmMatch) return [];
+    
+    const fmText = fmMatch[0];
+    const lines = fmText.split(/\r?\n/);
+    let inTags = false;
+    let tags = [];
+    
+    for (let line of lines) {
+        line = line.trim();
+        if (line === '---') continue;
+        
+        if (line.startsWith('tags:')) {
+            const val = line.substring(5).trim();
+            if (val) {
+                if (val.startsWith('[') && val.endsWith(']')) {
+                    tags = val.substring(1, val.length - 1)
+                              .split(',')
+                              .map(t => t.trim().replace(/^['"]|['"]$/g, ''))
+                              .filter(t => t.length > 0);
+                } else {
+                    tags = val.split(',')
+                              .map(t => t.trim().replace(/^['"]|['"]$/g, ''))
+                              .filter(t => t.length > 0);
+                }
+            } else {
+                inTags = true;
+            }
+        } else if (inTags) {
+            if (line.startsWith('-')) {
+                tags.push(line.substring(1).trim().replace(/^['"]|['"]$/g, ''));
+            } else if (line.includes(':')) {
+                inTags = false;
+            }
+        }
+    }
+    return Array.from(new Set(tags));
+}
+
+function updateActiveDocumentTags(newTags) {
+    const view = window.cmEditor;
+    if (!view) return;
+    
+    const content = view.state.doc.toString();
+    const tagsStr = `tags: [${newTags.join(', ')}]`;
+    
+    if (content.startsWith('---')) {
+        const fmMatch = content.match(/^---[\s\S]*?\r?\n---(\r?\n)?/);
+        if (fmMatch) {
+            const fmFullText = fmMatch[0];
+            const lines = fmFullText.split(/\r?\n/);
+            let tagsReplaced = false;
+            let newLines = [];
+            let inTags = false;
+            
+                    for (let line of lines) {
+                        const trimmed = line.trim();
+                        if (trimmed.startsWith('tags:')) {
+                            newLines.push(`tags: [${newTags.join(', ')}]`);
+                            tagsReplaced = true;
+                            const val = trimmed.substring(5).trim();
+                            if (!val) {
+                                inTags = true;
+                            }
+                        } else if (inTags) {
+                            if (trimmed.startsWith('-')) {
+                                continue;
+                            } else if (trimmed.includes(':') || trimmed === '---') {
+                                inTags = false;
+                                newLines.push(line);
+                            }
+                        } else {
+                            newLines.push(line);
+                        }
+                    }
+                    
+                    if (!tagsReplaced) {
+                        newLines.splice(1, 0, tagsStr);
+                    }
+                    
+                    const newFmText = newLines.join('\n');
+                    view.dispatch({
+                        changes: { from: 0, to: fmFullText.length, insert: newFmText }
+                    });
+                    return;
+                }
+            }
+            
+            const newContent = `---\n${tagsStr}\n---\n\n` + content;
+            view.dispatch({
+                changes: { from: 0, to: content.length, insert: newContent }
+            });
+        }
+
+        async function openHashtagModal() {
+            if (!currentFilePath) {
+                alert(t('msg_no_active_file') || "먼저 파일을 열어주세요.");
+                return;
+            }
+            
+            modalEditedTags = getActiveDocumentTags();
+            renderModalCurrentTags();
+            
+            const modal = document.getElementById('hashtag-modal');
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+            
+            if (window.pywebview) {
+                try {
+                    const res = await pywebview.api.get_workspace_tags();
+                    if (res.status === 'success') {
+                        renderModalSuggestTags(res.tags);
+                    }
+                } catch (err) {
+                    console.error("Error loading suggest tags:", err);
+                }
+            }
+        }
+
+        function closeHashtagModal() {
+            const modal = document.getElementById('hashtag-modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+            const input = document.getElementById('hashtag-new-input');
+            if (input) input.value = '';
+        }
+
+        function renderModalCurrentTags() {
+            const container = document.getElementById('hashtag-current-tags-container');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            if (modalEditedTags.length === 0) {
+                container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.85em;">등록된 태그가 없습니다.</span>`;
+                return;
+            }
+            
+            modalEditedTags.forEach(tag => {
+                const tagEl = document.createElement('span');
+                tagEl.style.background = 'rgba(69, 243, 255, 0.15)';
+                tagEl.style.color = 'var(--accent)';
+                tagEl.style.border = '1px solid rgba(69, 243, 255, 0.3)';
+                tagEl.style.padding = '4px 8px';
+                tagEl.style.borderRadius = '12px';
+                tagEl.style.fontSize = '0.8em';
+                tagEl.style.fontWeight = '500';
+                tagEl.style.display = 'inline-flex';
+                tagEl.style.alignItems = 'center';
+                tagEl.style.gap = '6px';
+                tagEl.style.cursor = 'pointer';
+                
+                tagEl.innerHTML = `#${tag} <i data-lucide="x" style="width: 12px; height: 12px; opacity: 0.7; transition: opacity 0.2s;"></i>`;
+                tagEl.onclick = () => removeHashtag(tag);
+                
+                tagEl.onmouseover = () => {
+                    const icon = tagEl.querySelector('svg');
+                    if (icon) icon.style.opacity = '1';
+                };
+                tagEl.onmouseout = () => {
+                    const icon = tagEl.querySelector('svg');
+                    if (icon) icon.style.opacity = '0.7';
+                };
+                
+                container.appendChild(tagEl);
+            });
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function renderModalSuggestTags(workspaceTagsMap) {
+            const container = document.getElementById('hashtag-suggest-tags-container');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            const allTags = Object.keys(workspaceTagsMap);
+            const suggestTags = allTags.filter(t => !modalEditedTags.includes(t));
+            
+            if (suggestTags.length === 0) {
+                container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.85em;">추천할 태그가 없습니다.</span>`;
+                return;
+            }
+            
+            suggestTags.forEach(tag => {
+                const tagEl = document.createElement('span');
+                tagEl.style.background = 'rgba(255, 255, 255, 0.03)';
+                tagEl.style.color = 'var(--text-muted)';
+                tagEl.style.border = '1px solid var(--border)';
+                tagEl.style.padding = '4px 8px';
+                tagEl.style.borderRadius = '12px';
+                tagEl.style.fontSize = '0.78em';
+                tagEl.style.cursor = 'pointer';
+                tagEl.style.transition = 'all 0.2s';
+                
+                tagEl.innerText = `#${tag}`;
+                tagEl.onclick = () => addHashtag(tag);
+                
+                tagEl.onmouseover = () => {
+                    tagEl.style.borderColor = 'var(--accent)';
+                    tagEl.style.color = 'var(--accent)';
+                    tagEl.style.background = 'rgba(69, 243, 255, 0.05)';
+                };
+                tagEl.onmouseout = () => {
+                    tagEl.style.borderColor = 'var(--border)';
+                    tagEl.style.color = 'var(--text-muted)';
+                    tagEl.style.background = 'rgba(255, 255, 255, 0.03)';
+                };
+                
+                container.appendChild(tagEl);
+            });
+        }
+
+        function addHashtag(tag) {
+            tag = tag.trim().replace(/^#/, '');
+            if (!tag) return;
+            if (!modalEditedTags.includes(tag)) {
+                modalEditedTags.push(tag);
+                renderModalCurrentTags();
+                if (window.pywebview) {
+                    pywebview.api.get_workspace_tags().then(res => {
+                        if (res.status === 'success') {
+                            renderModalSuggestTags(res.tags);
+                        }
+                    });
+                }
+            }
+        }
+
+        function removeHashtag(tag) {
+            modalEditedTags = modalEditedTags.filter(t => t !== tag);
+            renderModalCurrentTags();
+            if (window.pywebview) {
+                pywebview.api.get_workspace_tags().then(res => {
+                    if (res.status === 'success') {
+                        renderModalSuggestTags(res.tags);
+                    }
+                });
+            }
+        }
+
+        function addHashtagFromInput() {
+            const input = document.getElementById('hashtag-new-input');
+            if (!input) return;
+            
+            const rawVal = input.value.trim();
+            if (!rawVal) return;
+            
+            const newTags = rawVal.split(',').map(t => t.trim().replace(/^#/, '')).filter(t => t.length > 0);
+            newTags.forEach(tag => {
+                if (!modalEditedTags.includes(tag)) {
+                    modalEditedTags.push(tag);
+                }
+            });
+            
+            input.value = '';
+            renderModalCurrentTags();
+            
+            if (window.pywebview) {
+                pywebview.api.get_workspace_tags().then(res => {
+                    if (res.status === 'success') {
+                        renderModalSuggestTags(res.tags);
+                    }
+                });
+            }
+        }
+
+        async function saveHashtagChanges() {
+            updateActiveDocumentTags(modalEditedTags);
+            closeHashtagModal();
+            if (window.saveActiveFile) {
+                await saveActiveFile();
+            }
+            triggerLiveRender();
+        }
+
 // 해시태그 전역 바인딩
 window.openHashtagModal = openHashtagModal;
 window.closeHashtagModal = closeHashtagModal;
