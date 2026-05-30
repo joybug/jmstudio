@@ -1988,8 +1988,8 @@
             left: 50%;
             right: auto;
             transform: translate3d(-50%, 0, 0);
-            min-width: 352px;
-            max-width: 352px;
+            min-width: 398px;
+            max-width: 398px;
             height: 400px;
             overflow: visible !important;
             border-radius: 12px;

@@ -1,4 +1,4 @@
-# 🧪 Joy Markdown Studio v3.9.4 🌟
+# 🧪 Joy Markdown Studio v3.9.5 🌟
 
 > **The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio**  
 > A premium desktop markdown creator application crafted with Python (`PyWebView` + `Bottle`) and modern Vanilla CSS/JS.
@@ -88,6 +88,10 @@
 ### 14. 🛠️ Standalone Build Debug Tool Deactivation & Performance Stabilization (v3.9.4 New)
 * **Deactivated Developer Tools for Release**: Completely disabled the Chromium Developer Tools debug flag in the main webview shell setup, ensuring a clean, secure, and professional desktop academic workspace for the final compiled application.
 * **Emoji Rendering Layer Isolation Completed**: Successfully stabilized the system behavior, ensuring that the local offline serving and GPU hardware-accelerated scroll layers function flawlessly without memory leakage or stuttering in non-debugging mode.
+
+### 15. 🎨 Emoji Grid Layout Optimization & Category Tab Fix (v3.9.5 New)
+* **Expanded Dropdown Container**: Fixed the layout issue where the 10th column in the 10-column layout got truncated at the right border by expanding the dropdown menu width to `398px` and perfectly synchronizing the component's parent container width.
+* **Fine-Tuned Emojis and Button Sizing**: Adjusted individual emoji rendering size to `22px` and button bounding grid boxes to `34px`. Emojis, borders, and top category icons (including flags) now render beautifully with appropriate side padding and zero edge clipping.
 
 ---
 

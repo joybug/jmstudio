@@ -82,6 +82,8 @@ function renderEmojiPicker(force = false, theme = null, lang = null) {
         set: 'native',
         perLine: 10,
         maxFrequentRows: 3,
+        emojiSize: 22,
+        emojiButtonSize: 34,
         categories: ['frequent', 'smileys', 'people', 'nature', 'foods', 'activity', 'places', 'objects', 'symbols', 'flags'],
         data: async () => {
             const response = await fetch('/static/js/emoji-data.json');
