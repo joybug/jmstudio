@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>Joy Markdown Studio v3.9.2</title>
+    <title>Joy Markdown Studio v3.9.3</title>
     <!-- 외부 라이브러리 CDN 로드 -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&family=Lora:ital,wght@0,400..700;1,400..700&family=Fira+Code:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/katex.min.css">
@@ -19,7 +19,8 @@
     
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
     
-    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css?v=3.9.3_emoji_fix_v11">
 </head>
 <body>
 
@@ -844,6 +845,74 @@
                         <span style="font-size: 0.85em; opacity: 0.6; margin-left: 8px;">Editor</span>
                     </div>
                 </div>
+                <!-- 에디터 마크다운 툴바 -->
+                <div class="editor-toolbar">
+                    <!-- 드롭다운: 단락 / 머리글 -->
+                    <div class="toolbar-dropdown" id="toolbar-heading-dropdown">
+                        <button class="toolbar-dropdown-btn" id="toolbar-heading-btn">
+                            <span id="heading-btn-text">단락</span>
+                            <i data-lucide="chevron-down" style="width: 12px; height: 12px;"></i>
+                        </button>
+                        <div class="toolbar-dropdown-menu" id="toolbar-heading-menu">
+                            <div class="dropdown-item" onclick="setHeading(1)">머리글 1</div>
+                            <div class="dropdown-item" onclick="setHeading(2)">머리글 2</div>
+                            <div class="dropdown-item" onclick="setHeading(3)">머리글 3</div>
+                            <div class="dropdown-item" onclick="setHeading(4)">머리글 4</div>
+                            <div class="dropdown-item active" onclick="setHeading(0)">
+                                <span>단락</span>
+                                <i data-lucide="check" style="width: 14px; height: 14px;"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="toolbar-divider"></div>
+                    
+                    <!-- 굵게 / 기울이기 버튼 -->
+                    <button class="toolbar-btn" onclick="insertFormatting('bold')" title="굵게 (Ctrl+B)">
+                        <i data-lucide="bold" style="width: 14px; height: 14px;"></i>
+                    </button>
+                    <button class="toolbar-btn" onclick="insertFormatting('italic')" title="기울이기 (Ctrl+I)">
+                        <i data-lucide="italic" style="width: 14px; height: 14px;"></i>
+                    </button>
+                    
+                    <!-- 드롭다운: 목록 스타일 -->
+                    <div class="toolbar-dropdown" id="toolbar-list-dropdown">
+                        <button class="toolbar-dropdown-btn" id="toolbar-list-btn" title="목록 스타일">
+                            <i data-lucide="list" style="width: 14px; height: 14px;"></i>
+                            <i data-lucide="chevron-down" style="width: 12px; height: 12px;"></i>
+                        </button>
+                        <div class="toolbar-dropdown-menu" id="toolbar-list-menu">
+                            <div class="dropdown-item" onclick="insertListStyle('unordered')">
+                                <i data-lucide="list" style="width: 14px; height: 14px; margin-right: 6px;"></i>
+                                <span>글머리 기호 목록</span>
+                            </div>
+                            <div class="dropdown-item" onclick="insertListStyle('ordered')">
+                                <i data-lucide="list-ordered" style="width: 14px; height: 14px; margin-right: 6px;"></i>
+                                <span>순서가 지정된 목록</span>
+                            </div>
+                            <div class="dropdown-item" onclick="insertListStyle('checklist')">
+                                <i data-lucide="check-square" style="width: 14px; height: 14px; margin-right: 6px;"></i>
+                                <span>체크리스트</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 코드 블록 버튼 -->
+                    <button class="toolbar-btn" onclick="insertFormatting('code')" title="코드 블록">
+                        <i data-lucide="code" style="width: 14px; height: 14px;"></i>
+                    </button>
+                    
+                    <!-- 이모지 버튼 -->
+                    <div class="toolbar-dropdown" id="toolbar-emoji-dropdown">
+                        <button class="toolbar-btn" id="toolbar-emoji-btn" title="이모지 삽입">
+                            <i data-lucide="smile" style="width: 14px; height: 14px;"></i>
+                        </button>
+                        <div class="toolbar-dropdown-menu emoji-picker-menu" id="toolbar-emoji-menu" style="padding: 0; border: none; overflow: hidden; width: 352px; max-height: none;">
+                            <!-- Emoji Mart 컴포넌트 마운트 (emoji.js에서 동적 생성) -->
+                        </div>
+
+                    </div>
+                </div>
                 <div class="editor-container" id="editor-parent">
                     <!-- CodeMirror 6 will be mounted here dynamically -->
                 </div>
@@ -1219,9 +1288,10 @@
     <!-- 스크립트 파일 로직 -->
     
 
-    <!-- 모듈화된 외부 JavaScript 자산 로드 -->
-    <script src="/static/js/translations.js"></script>
-    <script type="module" src="/static/js/editor.js"></script>
+    <!-- 모듈화된 JavaScript 자산 로드 (캐시 무력화 버전 적용) -->
+    <script src="/static/js/translations.js?v=3.9.3_emoji_fix_v11"></script>
+    <script type="module" src="/static/js/editor.js?v=3.9.3_emoji_fix_v11"></script>
+    <script type="module" src="/static/js/emoji.js?v=3.9.3_emoji_fix_v11"></script>
 
 </body>
 </html>

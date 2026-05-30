@@ -1841,3 +1841,209 @@
                     input:checked + .graph-slider-switch:before {
                         transform: translateX(16px);
                     }
+
+        /* 에디터 마크다운 툴바 스타일 */
+        .editor-toolbar {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 8px 16px;
+            background: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 10;
+        }
+
+        .toolbar-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            color: var(--text-muted);
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .toolbar-btn:hover {
+            color: var(--accent);
+            background: var(--accent-glow);
+            border-color: rgba(69, 243, 255, 0.15);
+        }
+
+        .theme-light .toolbar-btn:hover {
+            border-color: rgba(2, 132, 199, 0.15);
+        }
+
+        .toolbar-btn i, .toolbar-btn svg {
+            pointer-events: none;
+        }
+
+        .toolbar-divider {
+            width: 1px;
+            height: 18px;
+            background: var(--border);
+            margin: 0 6px;
+        }
+
+        /* 드롭다운 공통 */
+        .toolbar-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .toolbar-dropdown-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-main);
+            padding: 6px 12px;
+            font-size: 0.85em;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            height: 32px;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .theme-light .toolbar-dropdown-btn {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .toolbar-dropdown-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        .toolbar-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            min-width: 150px;
+            z-index: 1000;
+            padding: 6px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .toolbar-dropdown.show .toolbar-dropdown-menu {
+            display: block;
+            animation: toolbarDropdownFadeIn 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes toolbarDropdownFadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 8px 12px;
+            font-size: 0.82em;
+            color: var(--text-main);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .dropdown-item:hover {
+            background: var(--accent-glow);
+            color: var(--accent);
+        }
+
+        .dropdown-item.active {
+            font-weight: 600;
+            color: var(--accent);
+            background: rgba(69, 243, 255, 0.08);
+        }
+        
+        .theme-light .dropdown-item.active {
+            background: rgba(2, 132, 199, 0.08);
+        }
+
+        .dropdown-item i, .dropdown-item svg {
+            pointer-events: none;
+        }
+
+        /* 이모지 선택기 */
+        #toolbar-emoji-dropdown .toolbar-dropdown-menu {
+            left: 50%;
+            right: auto;
+            transform: translate3d(-50%, 0, 0);
+            min-width: 352px;
+            max-width: 352px;
+            height: 400px;
+            overflow: visible !important;
+            border-radius: 12px;
+            padding: 0;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            background: var(--bg-card);
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            contain: content !important;
+        }
+
+        .theme-light #toolbar-emoji-dropdown .toolbar-dropdown-menu {
+            background: var(--bg-card);
+        }
+
+        #toolbar-emoji-dropdown.show .toolbar-dropdown-menu {
+            display: block;
+            animation: emojiDropdownFadeIn 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes emojiDropdownFadeIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(6px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        /* Emoji Mart 웹 컴포넌트 스타일 동기화 */
+        em-emoji-picker {
+            --background-color: var(--bg-card) !important;
+            --border-color: transparent !important;
+            --font-family: 'Inter', system-ui, sans-serif !important;
+            --category-icon-color: var(--text-muted) !important;
+            --category-icon-color-active: var(--accent) !important;
+            --accent-color: var(--accent) !important;
+            --text-color: var(--text-main) !important;
+            --search-background: rgba(255, 255, 255, 0.04) !important;
+            --search-border-color: var(--border) !important;
+            --search-placeholder-color: var(--text-muted) !important;
+            --search-icon-color: var(--text-muted) !important;
+            --shadow: none !important;
+            --border-radius: 12px !important;
+            --rgb-accent: 69, 243, 255 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            width: 100% !important;
+            height: 100% !important;
+            max-height: 400px !important;
+            contain: paint !important;
+            will-change: transform !important;
+            transform: translate3d(0, 0, 0) !important;
+            backface-visibility: hidden !important;
+        }
+
+        .theme-light em-emoji-picker {
+            --search-background: rgba(0, 0, 0, 0.04) !important;
+            --rgb-accent: 2, 132, 199 !important;
+        }

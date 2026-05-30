@@ -140,6 +140,7 @@ class UndoManager {
             `;
         }
 
+
         function t(key) {
             if (translations[currentLang] && translations[currentLang][key]) {
                 return translations[currentLang][key];
@@ -220,6 +221,10 @@ class UndoManager {
                 `;
                 lucide.createIcons();
             }
+            // 이모지 피커 다국어 로케일 동기화 (재렌더링 - 상태 인자 명시 주입)
+            if (window.renderEmojiPicker) {
+                window.renderEmojiPicker(true, currentTheme, currentLang);
+            }
             
             lucide.createIcons();
             
@@ -245,6 +250,94 @@ class UndoManager {
             currentIndex: -1
         };
 
+        function handleEnterKey(view) {
+            const state = view.state;
+            const selection = state.selection.main;
+            if (!selection.empty) return false;
+            
+            const pos = selection.head;
+            const line = state.doc.lineAt(pos);
+            const text = line.text;
+            const col = pos - line.from;
+            
+            const checklistRegex = /^(\s*[-*+]\s+\[[xX ]\]\s+)(.*)/;
+            const orderedRegex = /^(\s*(\d+)\.\s+)(.*)/;
+            const unorderedRegex = /^(\s*[-*+]\s+)(.*)/;
+            
+            let match;
+            
+            // 1. 체크리스트
+            if ((match = text.match(checklistRegex))) {
+                const prefix = match[1];
+                const content = match[2];
+                if (col < prefix.length) return false;
+                
+                if (content.trim() === "") {
+                    view.dispatch({
+                        changes: { from: line.from, to: line.to, insert: "" },
+                        selection: { anchor: line.from }
+                    });
+                    return true;
+                }
+                
+                const insertText = "\n" + prefix.replace(/\[[xX]\]/, "[ ]");
+                view.dispatch({
+                    changes: { from: pos, to: pos, insert: insertText },
+                    selection: { anchor: pos + insertText.length }
+                });
+                return true;
+            }
+            
+            // 2. 순서 목록
+            if ((match = text.match(orderedRegex))) {
+                const prefix = match[1];
+                const num = parseInt(match[2]);
+                const content = match[3];
+                if (col < prefix.length) return false;
+                
+                if (content.trim() === "") {
+                    view.dispatch({
+                        changes: { from: line.from, to: line.to, insert: "" },
+                        selection: { anchor: line.from }
+                    });
+                    return true;
+                }
+                
+                const spaces = prefix.match(/^\s*/)[0];
+                const nextNum = num + 1;
+                const insertText = `\n${spaces}${nextNum}. `;
+                view.dispatch({
+                    changes: { from: pos, to: pos, insert: insertText },
+                    selection: { anchor: pos + insertText.length }
+                });
+                return true;
+            }
+            
+            // 3. 순서 없는 목록
+            if ((match = text.match(unorderedRegex))) {
+                const prefix = match[1];
+                const content = match[2];
+                if (col < prefix.length) return false;
+                
+                if (content.trim() === "") {
+                    view.dispatch({
+                        changes: { from: line.from, to: line.to, insert: "" },
+                        selection: { anchor: line.from }
+                    });
+                    return true;
+                }
+                
+                const insertText = "\n" + prefix;
+                view.dispatch({
+                    changes: { from: pos, to: pos, insert: insertText },
+                    selection: { anchor: pos + insertText.length }
+                });
+                return true;
+            }
+            
+            return false;
+        }
+
         function initCodeMirror() {
             if (!window.cm6) {
                 // 모듈 로드 대기
@@ -261,6 +354,7 @@ class UndoManager {
                     cm.basicSetup,
                     cm.markdown(),
                     window.cmPlaceholderConf.of(cm.placeholder(t('msg_editor_placeholder'))),
+                    cm.keymap.of([{ key: "Enter", run: handleEnterKey }]),
                     cm.EditorView.updateListener.of((update) => {
                         if (update.docChanged) {
                             handleEditorInput();
@@ -788,9 +882,9 @@ class UndoManager {
                     }
                 }
                 
-                // 정상 초기화 완료: 스플래시 3초 페이드아웃
+                // 정상 초기화 완료: 스플래시 1초 페이드아웃
                 clearTimeout(splashSafetyTimer);
-                setTimeout(hideSplash, 3000);
+                setTimeout(hideSplash, 1000);
 
             } catch (err) {
                 clearTimeout(splashSafetyTimer);
@@ -819,8 +913,14 @@ class UndoManager {
             }
             lucide.createIcons();
             
+            
             // 프리뷰 리렌더링
             triggerLiveRender();
+            
+            // 이모지 피커 테마 동기화 (상태 인자 명시 주입)
+            if (window.renderEmojiPicker) {
+                window.renderEmojiPicker(true, currentTheme, currentLang);
+            }
             
             if (window.pywebview && saveConfig) {
                 pywebview.api.save_theme(theme);
@@ -2818,7 +2918,7 @@ import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.es
         import { basicSetup, EditorView } from 'https://esm.sh/codemirror';
         import { EditorState, Compartment } from 'https://esm.sh/@codemirror/state';
         import { markdown } from 'https://esm.sh/@codemirror/lang-markdown';
-        import { placeholder } from 'https://esm.sh/@codemirror/view';
+        import { placeholder, keymap } from 'https://esm.sh/@codemirror/view';
 
         window.cm6 = {
             basicSetup,
@@ -2826,7 +2926,8 @@ import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.es
             EditorState,
             Compartment,
             markdown,
-            placeholder
+            placeholder,
+            keymap
         };
         // 모듈 로드 완료 이벤트 발생
         window.dispatchEvent(new Event('cm6-loaded'));
@@ -3153,11 +3254,157 @@ if (window.lucide) {
                 alert(err.message);
             }
         }
+        // ----------------- 에디터 마크다운 툴바 액션 함수 -----------------
+        function insertFormatting(type) {
+            const view = window.cmEditor;
+            if (!view) return;
+            
+            const state = view.state;
+            const selection = state.selection.main;
+            const from = selection.from;
+            const to = selection.to;
+            const selectedText = state.doc.sliceString(from, to);
+            
+            let wrapStart = "", wrapEnd = "";
+            if (type === 'bold') {
+                wrapStart = "**";
+                wrapEnd = "**";
+            } else if (type === 'italic') {
+                wrapStart = "*";
+                wrapEnd = "*";
+            } else if (type === 'code') {
+                if (selectedText.includes('\n')) {
+                    wrapStart = "\n```\n";
+                    wrapEnd = "\n```\n";
+                } else {
+                    wrapStart = "`";
+                    wrapEnd = "`";
+                }
+            }
+            
+            const insertText = wrapStart + selectedText + wrapEnd;
+            
+            view.dispatch({
+                changes: { from, to, insert: insertText },
+                selection: { anchor: from + wrapStart.length + selectedText.length }
+            });
+            view.focus();
+        }
+
+        function setHeading(level) {
+            const view = window.cmEditor;
+            if (!view) return;
+            
+            const state = view.state;
+            const selection = state.selection.main;
+            const line = state.doc.lineAt(selection.head);
+            const text = line.text;
+            
+            // 기존 머리글 패턴 제거
+            const cleanText = text.replace(/^#+\s+/, "");
+            
+            let prefix = "";
+            if (level > 0 && level <= 4) {
+                prefix = "#".repeat(level) + " ";
+            }
+            
+            const insertText = prefix + cleanText;
+            
+            view.dispatch({
+                changes: { from: line.from, to: line.to, insert: insertText },
+                selection: { anchor: line.from + insertText.length }
+            });
+            view.focus();
+            
+            // UI 텍스트 갱신
+            const btnText = document.getElementById('heading-btn-text');
+            if (btnText) {
+                btnText.innerText = level === 0 ? "단락" : `머리글 ${level}`;
+            }
+            
+            // 활성화 스타일 체크 표시 갱신
+            const items = document.querySelectorAll('#toolbar-heading-menu .dropdown-item');
+            items.forEach((item, idx) => {
+                item.classList.remove('active');
+                const checkIcon = item.querySelector('svg, i[data-lucide]');
+                if (checkIcon) checkIcon.remove();
+                
+                const itemLevel = idx === 4 ? 0 : idx + 1;
+                if (itemLevel === level) {
+                    item.classList.add('active');
+                    const checkEl = document.createElement('i');
+                    checkEl.setAttribute('data-lucide', 'check');
+                    checkEl.style.width = '14px';
+                    checkEl.style.height = '14px';
+                    item.appendChild(checkEl);
+                }
+            });
+            if (window.lucide) lucide.createIcons();
+            
+            document.getElementById('toolbar-heading-dropdown').classList.remove('show');
+        }
+
+        function insertListStyle(type) {
+            const view = window.cmEditor;
+            if (!view) return;
+            
+            const state = view.state;
+            const selection = state.selection.main;
+            const line = state.doc.lineAt(selection.head);
+            const text = line.text;
+            
+            // 기존 목록 패턴 제거
+            const cleanText = text.replace(/^(\s*([-*+]\s+\[[xX ]\]\s+|\d+\.\s+|[-*+]\s+))/, "");
+            
+            let prefix = "";
+            if (type === 'unordered') {
+                prefix = "- ";
+            } else if (type === 'ordered') {
+                prefix = "1. ";
+            } else if (type === 'checklist') {
+                prefix = "- [ ] ";
+            }
+            
+            const insertText = prefix + cleanText;
+            
+            view.dispatch({
+                changes: { from: line.from, to: line.to, insert: insertText },
+                selection: { anchor: line.from + insertText.length }
+            });
+            view.focus();
+            
+            document.getElementById('toolbar-list-dropdown').classList.remove('show');
+        }
 
 
+        // 드롭다운 외부 클릭 시 숨김 처리 및 버튼 클릭 토글 등록
+        document.addEventListener('click', function(e) {
+            const dropdowns = document.querySelectorAll('.toolbar-dropdown');
+            dropdowns.forEach(dd => {
+                const btn = dd.querySelector('.toolbar-dropdown-btn, .toolbar-btn');
+                if (btn && btn.contains(e.target)) {
+                    dd.classList.toggle('show');
+                    
+                    // 이모지 드롭다운이 열리는 시점에 Lazy 렌더링 수행 (애니메이션 완료 대기 200ms 지연 및 인자 명시 주입, 재사용을 위해 force=false 지정)
+                    if (dd.id === 'toolbar-emoji-dropdown' && dd.classList.contains('show')) {
+                        if (window.renderEmojiPicker) {
+                            setTimeout(() => {
+                                window.renderEmojiPicker(false, currentTheme, currentLang);
+                            }, 200);
+                        }
+                    }
 
+                } else if (!dd.contains(e.target)) {
+                    dd.classList.remove('show');
+                }
+            });
+        });
 
 // ES Module의 전역 스코프 격리 해제를 위한 윈도우 바인딩 코드
+window.insertFormatting = insertFormatting;
+window.setHeading = setHeading;
+window.insertListStyle = insertListStyle;
+
 window.addDocumentToLibrary = addDocumentToLibrary;
 window.closeCreateModal = closeCreateModal;
 window.closeMermaidFullscreen = closeMermaidFullscreen;
