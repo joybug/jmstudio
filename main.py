@@ -24,8 +24,8 @@ def main():
         min_size=(1000, 650)
     )
     
-    # 4. PyWebView 루프 시작 (디버그 및 개발자 도구 활성화)
-    webview.start(debug=True)
+    # 4. PyWebView 루프 시작 (디버그 비활성화 및 개발자 도구 숨김)
+    webview.start()
 
 if __name__ == "__main__":
     main()

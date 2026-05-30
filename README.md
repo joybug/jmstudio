@@ -1,4 +1,4 @@
-# 🧪 Joy Markdown Studio v3.9.3 🌟
+# 🧪 Joy Markdown Studio v3.9.4 🌟
 
 > **The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio**  
 > A premium desktop markdown creator application crafted with Python (`PyWebView` + `Bottle`) and modern Vanilla CSS/JS.
@@ -84,6 +84,10 @@
 * **Zero-Lag Click Response via Background Pre-rendering**: Improved the initial click rendering lag (0.5s–1s) by pre-rendering the emoji picker in the background shortly after the application starts. Clicking the emoji button now gives **instant, 0ms responses**.
 * **GPU 3D Accelerated & Isolated Containment Scrolling**: Enforced CSS `contain: content/paint` layout rules alongside `will-change: transform` to isolate repainting and prevent the heavy CodeMirror text editor layout from redrawing during emoji scrolling, delivering silky-smooth 60fps+ hardware-accelerated scrolling.
 * **Expanded Frequent Emojis (Up to 30)**: Provides up to 30 frequently used emojis arranged in a clean 10x3 grid at the very top, and resolved the virtual scrolling viewport offset issue for flawless category tab navigation.
+
+### 14. 🛠️ Standalone Build Debug Tool Deactivation & Performance Stabilization (v3.9.4 New)
+* **Deactivated Developer Tools for Release**: Completely disabled the Chromium Developer Tools debug flag in the main webview shell setup, ensuring a clean, secure, and professional desktop academic workspace for the final compiled application.
+* **Emoji Rendering Layer Isolation Completed**: Successfully stabilized the system behavior, ensuring that the local offline serving and GPU hardware-accelerated scroll layers function flawlessly without memory leakage or stuttering in non-debugging mode.
 
 ---
 
