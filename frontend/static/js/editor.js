@@ -891,6 +891,22 @@ class UndoManager {
                 clearTimeout(splashSafetyTimer);
                 setTimeout(hideSplash, 1000);
 
+                // 업데이트 알림 체크
+                if (state && state.update_available) {
+                    setTimeout(() => {
+                        const currentVersionEl = document.getElementById('update-current-version');
+                        const latestVersionEl = document.getElementById('update-latest-version');
+                        if (currentVersionEl) currentVersionEl.innerText = 'v' + state.current_version;
+                        if (latestVersionEl) latestVersionEl.innerText = 'v' + state.latest_version;
+                        
+                        const updateModal = document.getElementById('update-modal');
+                        if (updateModal) {
+                            updateModal.style.display = 'flex';
+                            if (window.lucide) lucide.createIcons();
+                        }
+                    }, 1800);
+                }
+
             } catch (err) {
                 clearTimeout(splashSafetyTimer);
                 console.error("Initialization error:", err);
@@ -2763,6 +2779,20 @@ class UndoManager {
             }
         }
 
+        function closeUpdateModal() {
+            const modal = document.getElementById('update-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function copyPipCommand() {
+            const cmdText = document.getElementById('pip-update-command').innerText;
+            navigator.clipboard.writeText(cmdText).then(() => {
+                showToast(t('msg_copy_success') || '클립보드에 복사되었습니다.');
+            }).catch(err => {
+                console.error('Copy failed:', err);
+            });
+        }
+
         function showAuthOverlay() {
             // 데스크톱 앱 내부 직접 실행 시에는 암호 오버레이창 차단
             if (window.pywebview && !window.pywebview.is_browser_proxy) {
@@ -3505,3 +3535,5 @@ window.updateGoogleDriveStatus = updateGoogleDriveStatus;
 window.updateActiveFileSyncStatus = updateActiveFileSyncStatus;
 window.refreshRemoteFiles = refreshRemoteFiles;
 window.downloadRemoteFile = downloadRemoteFile;
+window.closeUpdateModal = closeUpdateModal;
+window.copyPipCommand = copyPipCommand;

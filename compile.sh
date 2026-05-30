@@ -32,8 +32,8 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# APP_NAME = "Joy Markdown Studio v3.61" 라인에서 버전만 추출
-APP_VER=$(grep "APP_NAME =" app_config.py | sed -E "s/.*v([0-9.]+).*/\1/")
+# app_config.py에서 버전 정보 추출
+APP_VER=$($PY_CMD -c "import app_config; print(app_config.VERSION)")
 if [ -z "$APP_VER" ]; then
     APP_VER="unknown"
 fi

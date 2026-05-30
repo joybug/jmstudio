@@ -3,8 +3,9 @@ import json
 import webview
 import socket
 import urllib.parse
+import urllib.request
 from app_config import (
-    get_config, save_config, PORT, BIND_IP,
+    get_config, save_config, PORT, BIND_IP, VERSION,
     DEFAULT_UI_FONT, DEFAULT_EDITOR_FONT, DEFAULT_EDITOR_FONT_SIZE
 )
 from gdrive_sync import GoogleDriveSync
@@ -12,6 +13,30 @@ from gdrive_sync import GoogleDriveSync
 # 전역 window 및 API 레퍼런스 (main.py에서 주입)
 window = None
 api_instance = None
+
+def get_pypi_latest_version():
+    url = "https://pypi.org/pypi/joy-markdown-studio/json"
+    try:
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=2.0) as response:
+            data = json.loads(response.read().decode('utf-8'))
+            return data.get("info", {}).get("version", "")
+    except Exception:
+        return ""
+
+def is_update_available(current_ver, latest_ver):
+    if not latest_ver:
+        return False
+    try:
+        def parse_version(v):
+            parts = []
+            for p in v.split('.'):
+                num = ''.join(c for c in p if c.isdigit())
+                parts.append(int(num) if num else 0)
+            return tuple(parts)
+        return parse_version(latest_ver) > parse_version(current_ver)
+    except Exception:
+        return False
 
 def get_local_ip():
     try:
@@ -48,6 +73,10 @@ class MdViewerApi:
                 cfg["last_file"] = ""
                 save_config(cfg)
                 
+        # PyPI 버전 업데이트 체크
+        latest_ver = get_pypi_latest_version()
+        update_available = is_update_available(VERSION, latest_ver)
+                
         return {
             "workspace": self.workspace,
             "theme": cfg.get("theme", "dark"),
@@ -60,7 +89,10 @@ class MdViewerApi:
             "local_ip": get_local_ip(),
             "ui_font": cfg.get("ui_font", DEFAULT_UI_FONT),
             "editor_font": cfg.get("editor_font", DEFAULT_EDITOR_FONT),
-            "editor_font_size": cfg.get("editor_font_size", DEFAULT_EDITOR_FONT_SIZE)
+            "editor_font_size": cfg.get("editor_font_size", DEFAULT_EDITOR_FONT_SIZE),
+            "update_available": update_available,
+            "latest_version": latest_ver,
+            "current_version": VERSION
         }
 
     def save_network_settings(self, bind_ip, port, access_password):

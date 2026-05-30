@@ -209,6 +209,16 @@ const translations = {
                 "btn_cancel": "취소",
                 "btn_create": "생성",
                 
+                // Update Modal
+                "update_modal_title": "새로운 버전 출시 알림",
+                "update_modal_subtitle": "최신 기능과 안정화 패치가 적용되었습니다.",
+                "update_lbl_current": "현재 버전",
+                "update_lbl_latest": "최신 버전 (PyPI)",
+                "update_pip_title": "📦 pip로 원클릭 업데이트",
+                "update_git_title": "🖥️ 공식 GitHub 프로젝트 페이지",
+                "btn_visit_git": "방문하기",
+                "msg_copy_success": "명령어가 클립보드에 복사되었습니다.",
+                
                 // Settings Modal
                 "settings_title": "네트워크 및 보안 설정",
                 "settings_network_info": "현재 네트워크 접속 정보",
@@ -569,6 +579,16 @@ const translations = {
                 "placeholder_name": "Please enter a name...",
                 "btn_cancel": "Cancel",
                 "btn_create": "Create",
+                
+                // Update Modal
+                "update_modal_title": "New Version Available",
+                "update_modal_subtitle": "The latest features and stability patches have been applied.",
+                "update_lbl_current": "Current Version",
+                "update_lbl_latest": "Latest Version (PyPI)",
+                "update_pip_title": "📦 One-Click Update with pip",
+                "update_git_title": "🖥️ Official GitHub Project Page",
+                "btn_visit_git": "Visit",
+                "msg_copy_success": "Command copied to clipboard.",
                 
                 // Settings Modal
                 "settings_title": "Network & Security Settings",
