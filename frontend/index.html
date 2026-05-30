@@ -845,9 +845,12 @@
                 </div>
                 
                 <!-- 태그 검색 입력창 -->
-                <div style="display: flex; position: relative;">
-                    <input type="text" id="tags-search-input" placeholder="태그 이름 검색..." oninput="onTagSearchInput()" style="flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; color: var(--text-main); padding: 8px 12px 8px 32px; font-size: 0.85em; outline: none; transition: border-color 0.2s;" data-i18n-placeholder="placeholder_tags_search">
+                <div style="display: flex; position: relative; width: 100%; margin-bottom: 10px;">
+                    <input type="text" id="tags-search-input" placeholder="태그 이름 검색..." oninput="onTagSearchInput()" style="flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; color: var(--text-main); padding: 8px 32px 8px 32px; font-size: 0.85em; outline: none; transition: border-color 0.2s;" data-i18n-placeholder="placeholder_tags_search">
                     <i data-lucide="search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: var(--text-muted); pointer-events: none;"></i>
+                    <button id="tags-search-clear-btn" onclick="clearTagSearch()" style="display: none; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; padding: 0; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none; transition: color 0.2s;">
+                        <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+                    </button>
                 </div>
                 
                 <!-- 태그 클라우드/목록 영역 -->

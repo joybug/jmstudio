@@ -3578,6 +3578,13 @@ function openTagsManager() {
         toggleSidebar();
     }
     setSidebarTab('tags');
+    setTimeout(() => {
+        const searchInput = document.getElementById('tags-search-input');
+        if (searchInput) {
+            searchInput.focus();
+            searchInput.select();
+        }
+    }, 150);
 }
 
 async function loadWorkspaceTags() {
@@ -3611,9 +3618,27 @@ function filterAndRenderTags() {
 
 function onTagSearchInput() {
     const input = document.getElementById('tags-search-input');
+    const clearBtn = document.getElementById('tags-search-clear-btn');
     if (input) {
         tagSearchQuery = input.value.trim().toLowerCase();
+        if (clearBtn) {
+            clearBtn.style.display = tagSearchQuery ? 'flex' : 'none';
+        }
         filterAndRenderTags();
+    }
+}
+
+function clearTagSearch() {
+    const input = document.getElementById('tags-search-input');
+    const clearBtn = document.getElementById('tags-search-clear-btn');
+    if (input) {
+        input.value = '';
+        tagSearchQuery = '';
+        if (clearBtn) {
+            clearBtn.style.display = 'none';
+        }
+        filterAndRenderTags();
+        input.focus();
     }
 }
 
@@ -3624,7 +3649,8 @@ function renderTagsCloud(tagsMap) {
     
     const tags = Object.keys(tagsMap);
     if (tags.length === 0) {
-        container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.85em; width: 100%; text-align: center;">${t('tags_no_tags')}</span>`;
+        const msgKey = tagSearchQuery ? 'tags_no_search_results' : 'tags_no_tags';
+        container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.85em; width: 100%; text-align: center;">${t(msgKey)}</span>`;
         return;
     }
 
@@ -4043,3 +4069,4 @@ window.loadWorkspaceTags = loadWorkspaceTags;
 window.filterFilesByTag = filterFilesByTag;
 window.clearTagFilter = clearTagFilter;
 window.onTagSearchInput = onTagSearchInput;
+window.clearTagSearch = clearTagSearch;
