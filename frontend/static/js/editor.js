@@ -3570,6 +3570,14 @@ window.copyPipCommand = copyPipCommand;
 let activeTagFilter = null;
 let modalEditedTags = [];
 
+function openTagsManager() {
+    const sidebar = document.getElementById('sidebar-panel');
+    if (sidebar && sidebar.classList.contains('collapsed')) {
+        toggleSidebar();
+    }
+    setSidebarTab('tags');
+}
+
 async function loadWorkspaceTags() {
     if (!window.pywebview) return;
     try {
@@ -3998,6 +4006,7 @@ function updateActiveDocumentTags(newTags) {
         }
 
 // 해시태그 전역 바인딩
+window.openTagsManager = openTagsManager;
 window.openHashtagModal = openHashtagModal;
 window.closeHashtagModal = closeHashtagModal;
 window.addHashtagFromInput = addHashtagFromInput;

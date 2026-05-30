@@ -44,9 +44,9 @@
                 <i data-lucide="file-plus" style="width: 14px; height: 14px;"></i>
                 <span data-i18n="btn_add_doc">문서 추가</span>
             </button>
-            <button class="add-doc-btn" onclick="openHashtagModal()" title="해시태그 편집" data-i18n-title="tooltip_edit_tags">
+            <button class="add-doc-btn" onclick="openTagsManager()" title="해시태그 관리자" data-i18n-title="sidebar_title_tags">
                 <i data-lucide="tag" style="width: 14px; height: 14px;"></i>
-                <span data-i18n="hashtag_modal_title">해시태그 편집</span>
+                <span data-i18n="sidebar_title_tags">해시태그 관리자</span>
             </button>
         </div>
 
@@ -134,10 +134,7 @@
                     <i data-lucide="network" style="width: 13px; height: 13px;"></i>
                     <span data-i18n="tab_diagram">다이어그램</span>
                 </button>
-                <button class="sidebar-tab-btn" id="tab-tags" onclick="setSidebarTab('tags')" style="flex: 1; padding: 12px 6px; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 0.76em; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s;">
-                    <i data-lucide="tag" style="width: 13px; height: 13px;"></i>
-                    <span data-i18n="tab_tags">태그</span>
-                </button>
+
             </div>
             
             <!-- 내 서재 패널 -->
