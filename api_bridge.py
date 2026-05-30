@@ -48,6 +48,48 @@ def get_local_ip():
     except:
         return "127.0.0.1"
 
+def extract_tags_from_file(file_path):
+    if not os.path.exists(file_path) or not os.path.isfile(file_path):
+        return []
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            lines = []
+            for _ in range(30):
+                line = f.readline()
+                if not line:
+                    break
+                lines.append(line.strip())
+        
+        if len(lines) > 1 and lines[0] == "---":
+            end_idx = -1
+            for i in range(1, len(lines)):
+                if lines[i] == "---":
+                    end_idx = i
+                    break
+            if end_idx != -1:
+                front_matter_lines = lines[1:end_idx]
+                in_tags = False
+                tags = []
+                for line in front_matter_lines:
+                    if line.startswith("tags:"):
+                        val = line.split("tags:", 1)[1].strip()
+                        if val:
+                            if val.startswith("[") and val.endswith("]"):
+                                tags.extend([t.strip().strip("'\"") for t in val[1:-1].split(",") if t.strip()])
+                            else:
+                                tags.extend([t.strip().strip("'\"") for t in val.split(",") if t.strip()])
+                        else:
+                            in_tags = True
+                    elif in_tags:
+                        if line.startswith("-"):
+                            tags.append(line.split("-", 1)[1].strip().strip("'\""))
+                        elif ":" in line:
+                            in_tags = False
+                return list(set(tags))
+    except Exception as e:
+        print(f"Error parsing tags from {file_path}: {e}")
+    return []
+
 class MdViewerApi:
     def __init__(self):
         # active_workspace 관리
@@ -94,6 +136,29 @@ class MdViewerApi:
             "latest_version": latest_ver,
             "current_version": VERSION
         }
+
+    def get_workspace_tags(self):
+        cfg = get_config()
+        added_docs = cfg.get("added_documents", [])
+        
+        tags_map = {}
+        for path in added_docs:
+            if os.path.isabs(path):
+                full_path = path
+            else:
+                full_path = os.path.join(self.workspace, path)
+                
+            if os.path.exists(full_path) and os.path.isfile(full_path):
+                tags = extract_tags_from_file(full_path)
+                filename = os.path.basename(path)
+                for tag in tags:
+                    if tag not in tags_map:
+                        tags_map[tag] = []
+                    tags_map[tag].append({
+                        "path": path,
+                        "name": filename
+                    })
+        return {"status": "success", "tags": tags_map}
 
     def save_network_settings(self, bind_ip, port, access_password):
         try:
@@ -304,7 +369,7 @@ class MdViewerApi:
             else:
                 os.makedirs(os.path.dirname(full_path), exist_ok=True)
                 with open(full_path, "w", encoding="utf-8") as f:
-                    f.write("")
+                    f.write("---\ntags: [새문서]\n---\n\n")
                 cfg = get_config()
                 added_docs = cfg.get("added_documents", [])
                 if rel_path not in added_docs:

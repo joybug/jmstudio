@@ -861,6 +861,7 @@ class UndoManager {
                 updateBlueLightIcon(blueLightStored);
                 
                 renderFileTree(state.files);
+                loadWorkspaceTags();
                 
                 // 실행파일 경로의 external math_db.json 존재 여부 확인 및 로드
                 try {
@@ -1215,8 +1216,17 @@ class UndoManager {
                     return;
                 }
                 
+                // Front Matter (태그 등 메타데이터)가 있으면 미리보기 렌더링에서 제거
+                let cleanMarkdownText = markdownText;
+                if (markdownText.startsWith('---')) {
+                    const fmMatch = markdownText.match(/^---[\s\S]*?\r?\n---(\r?\n)?/);
+                    if (fmMatch) {
+                        cleanMarkdownText = markdownText.slice(fmMatch[0].length);
+                    }
+                }
+                
                 // 1. Math block 임시 마스킹 (Marked 파서 간섭 방지)
-                const maskedText = maskLaTeX(markdownText);
+                const maskedText = maskLaTeX(cleanMarkdownText);
                 
                 // 2. 콜아웃 (Quarto 및 Github 스타일) 변환
                 const calloutParsed = parseCallouts(maskedText);
@@ -1635,29 +1645,33 @@ class UndoManager {
             }
         }
 
-        // 사이드바 수식 입력기 및 화학식 검색기, 다이어그램 탭 전환 기능
+        // 사이드바 수식 입력기 및 화학식 검색기, 다이어그램, 태그 탭 전환 기능
         function setSidebarTab(tab) {
             const explorerPane = document.getElementById('sidebar-content-explorer');
             const mathPane = document.getElementById('sidebar-content-math');
             const chemistryPane = document.getElementById('sidebar-content-chemistry');
             const diagramPane = document.getElementById('sidebar-content-diagram');
+            const tagsPane = document.getElementById('sidebar-content-tags');
             
             const tabBtnExplorer = document.getElementById('tab-explorer');
             const tabBtnMath = document.getElementById('tab-math');
             const tabBtnChemistry = document.getElementById('tab-chemistry');
             const tabBtnDiagram = document.getElementById('tab-diagram');
+            const tabBtnTags = document.getElementById('tab-tags');
             
             // 모든 패널 숨김
             explorerPane.style.display = 'none';
             mathPane.style.display = 'none';
             if (chemistryPane) chemistryPane.style.display = 'none';
             if (diagramPane) diagramPane.style.display = 'none';
+            if (tagsPane) tagsPane.style.display = 'none';
             
             // 모든 탭 버튼 비활성화
             tabBtnExplorer.classList.remove('active');
             tabBtnMath.classList.remove('active');
             if (tabBtnChemistry) tabBtnChemistry.classList.remove('active');
             if (tabBtnDiagram) tabBtnDiagram.classList.remove('active');
+            if (tabBtnTags) tabBtnTags.classList.remove('active');
             
             tabBtnExplorer.style.borderBottom = '2px solid transparent';
             tabBtnExplorer.style.color = 'var(--text-muted)';
@@ -1670,6 +1684,10 @@ class UndoManager {
             if (tabBtnDiagram) {
                 tabBtnDiagram.style.borderBottom = '2px solid transparent';
                 tabBtnDiagram.style.color = 'var(--text-muted)';
+            }
+            if (tabBtnTags) {
+                tabBtnTags.style.borderBottom = '2px solid transparent';
+                tabBtnTags.style.color = 'var(--text-muted)';
             }
             
             // 선택된 탭 활성화
@@ -1698,6 +1716,14 @@ class UndoManager {
                     tabBtnDiagram.style.borderBottom = '2px solid var(--accent)';
                     tabBtnDiagram.style.color = 'var(--text-main)';
                 }
+            } else if (tab === 'tags') {
+                if (tagsPane) tagsPane.style.display = 'flex';
+                if (tabBtnTags) {
+                    tabBtnTags.classList.add('active');
+                    tabBtnTags.style.borderBottom = '2px solid var(--accent)';
+                    tabBtnTags.style.color = 'var(--text-main)';
+                }
+                loadWorkspaceTags();
             }
         }
 
@@ -2534,6 +2560,7 @@ class UndoManager {
             const res = await pywebview.api.save_file(currentFilePath, content);
             if (res.status === 'success') {
                 showToast(t('msg_save_success'));
+                loadWorkspaceTags(); // Refresh tags index on save
                 
                 // 구글 드라이브 자동 동기화 처리
                 if (gdriveAuthenticated) {
@@ -2638,6 +2665,7 @@ class UndoManager {
             
             if (res.status === 'success') {
                 renderFileTree(res.files);
+                loadWorkspaceTags(); // Refresh tags index on creation
                 closeCreateModal();
                 
                 if (isCreatingType === 'file_template' && window.selectedTemplateId) {
@@ -2682,6 +2710,7 @@ class UndoManager {
                 const res = await pywebview.api.delete_item(relPath);
                 if (res.status === 'success') {
                     renderFileTree(res.files);
+                    loadWorkspaceTags(); // Refresh tags index on deletion
                     if (currentFilePath === relPath || currentFilePath.startsWith(relPath + "/")) {
                         currentFilePath = "";
                         document.getElementById('active-file-title').innerText = t('msg_no_active_file');
@@ -3537,3 +3566,14 @@ window.refreshRemoteFiles = refreshRemoteFiles;
 window.downloadRemoteFile = downloadRemoteFile;
 window.closeUpdateModal = closeUpdateModal;
 window.copyPipCommand = copyPipCommand;
+
+// 해시태그 전역 바인딩
+window.openHashtagModal = openHashtagModal;
+window.closeHashtagModal = closeHashtagModal;
+window.addHashtagFromInput = addHashtagFromInput;
+window.saveHashtagChanges = saveHashtagChanges;
+window.removeHashtag = removeHashtag;
+window.addHashtag = addHashtag;
+window.loadWorkspaceTags = loadWorkspaceTags;
+window.filterFilesByTag = filterFilesByTag;
+window.clearTagFilter = clearTagFilter;

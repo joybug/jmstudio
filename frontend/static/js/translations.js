@@ -371,7 +371,22 @@ const translations = {
                 "template_timetable_title": "주간 시간표 & 스케줄",
                 "template_timetable_desc": "가독성 높은 마크다운 표 형식의 월~금 요일별 시간대 업무/강의 스케줄러.",
                 "template_memo_title": "아이디어 퀵 메모장",
-                "template_memo_desc": "정리되지 않은 생각, 순간의 영감, 스크래치 패드 및 핵심 요약 메모."
+                "template_memo_desc": "정리되지 않은 생각, 순간의 영감, 스크래치 패드 및 핵심 요약 메모.",
+                
+                // Tags
+                "tab_tags": "태그",
+                "sidebar_title_tags": "해시태그 관리자",
+                "sidebar_desc_tags": "서재 파일들의 해시태그를 모아보고 탐색합니다.",
+                "tags_filtered_files": "태그별 파일 목록",
+                "tags_no_tags": "등록된 해시태그가 없습니다.",
+                "tags_clear_filter": "필터 초기화",
+                "hashtag_modal_title": "해시태그 편집",
+                "hashtag_modal_current_tags": "현재 문서 태그",
+                "hashtag_modal_add_tag": "태그 추가",
+                "placeholder_add_tag_input": "새 태그 입력 (Enter)",
+                "hashtag_modal_suggest_tags": "자주 쓰이는 태그 추천 (클릭 시 추가)",
+                "tooltip_edit_tags": "해시태그 편집",
+                "btn_add": "추가"
             },
             en: {
                 // Header
@@ -742,7 +757,22 @@ const translations = {
                 "template_timetable_title": "Weekly Timetable",
                 "template_timetable_desc": "A highly readable markdown table scheduling weekly lectures, classes, or tasks (Mon-Fri).",
                 "template_memo_title": "Quick Idea Memo",
-                "template_memo_desc": "Capture thoughts, sudden inspirations, draft points, and key bullet summaries."
+                "template_memo_desc": "Capture thoughts, sudden inspirations, draft points, and key bullet summaries.",
+                
+                // Tags
+                "tab_tags": "Tags",
+                "sidebar_title_tags": "Hashtag Manager",
+                "sidebar_desc_tags": "Collect and explore hashtags from your library files.",
+                "tags_filtered_files": "Files by Tag",
+                "tags_no_tags": "No hashtags registered.",
+                "tags_clear_filter": "Clear Filter",
+                "hashtag_modal_title": "Edit Hashtags",
+                "hashtag_modal_current_tags": "Current Document Tags",
+                "hashtag_modal_add_tag": "Add Tag",
+                "placeholder_add_tag_input": "Enter new tag (Enter)",
+                "hashtag_modal_suggest_tags": "Suggested Tags (Click to add)",
+                "tooltip_edit_tags": "Edit Hashtags",
+                "btn_add": "Add"
             }
         };
 window.translations = translations;

@@ -1,4 +1,4 @@
-# 🧪 Joy Markdown Studio v3.9.8 🌟
+# 🧪 Joy Markdown Studio v3.9.9 🌟
 
 > **The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio**  
 > A premium desktop markdown creator application crafted with Python (`PyWebView` + `Bottle`) and modern Vanilla CSS/JS.
@@ -108,6 +108,12 @@
 * **Asynchronous PyPI API Query**: Queries the official PyPI database (`https://pypi.org/pypi/joy-markdown-studio/json`) in the background on startup, utilizing a 2-second timeout to check for the latest package version without blocking the application startup or UI responsiveness.
 * **Intelligent Version Comparator**: Compares local and remote version strings as semantic version tuples to trigger upgrade alerts only when a newer version is officially released on PyPI.
 * **Premium Glassmorphism Upgrade Modal**: Greets the user 1.8 seconds after the splash screen fades out with a modern blur-effect modal showing current/latest versions, one-click `pip` command clipboard copying, and GitHub official link redirect.
+
+### 19. 🏷️ YAML Front Matter-based Hashtag & Intelligent Tag Manager (v3.9.9 New)
+* **Editor Top Tag Editor**: Clicking the hashtag shortcut button in the top toolbar opens a modal allowing users to manage YAML Front Matter `tags` metadata of the active document in real time (adding/deleting tags, or selecting suggested tags).
+* **Automatic Default Tag Injection**: Creating a new document automatically inserts default tags (`tags: [새문서]` or `tags: [NewDocument]`), and launching any of the 9 templates pre-populates context-aware tags matching the template's characteristics.
+* **Sidebar Tag Manager**: A dedicated Hashtag tab in the sidebar crawls all markdown files in the workspace to display unique tags, document counts, and lets users browse and launch tagged documents in one click.
+* **Auto-Hide Front Matter in Preview**: While rendering Markdown to HTML, the system automatically detects the top Front Matter block (`---` to `---`) and slices it out of the preview area for a clean reading experience.
 
 ---
 
