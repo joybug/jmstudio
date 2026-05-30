@@ -1,4 +1,4 @@
-# 🧪 Joy Markdown Studio v3.9.7 🌟
+# 🧪 Joy Markdown Studio v3.9.8 🌟
 
 > **The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio**  
 > A premium desktop markdown creator application crafted with Python (`PyWebView` + `Bottle`) and modern Vanilla CSS/JS.
@@ -103,6 +103,11 @@
 * **Independent Source Code Isolation (`templates.js`)**: Isolated large markdown template data and dedicated rendering logic from `editor.js` into a standalone `templates.js` module, greatly improving code readability and application startup performance.
 * **Compact Sidebar-Integrated Selector UX**: Moved away from the bulky tab layout. Added a `Create from Template` button directly in the `My Library` explorer header next to the `New File` button. Clicking it instantly switches the library tree into a highly compact, sidebar-optimized card list of the 9 templates.
 * **One-Click Localized File Creation & Split-View Auto-Open**: Clicking any template immediately opens a file creation dialog, prefilled with a localized default filename based on language settings (e.g., `학술논문_템플릿.md` or `thesis_template.md`). On creation, the template content is auto-injected and saved, and the editor automatically switches to Split View mode for instant editing, while returning the sidebar to standard folder tree view.
+
+### 18. 📦 PyPI Latest Version Check & Automatic Upgrade Notification (v3.9.8 New)
+* **Asynchronous PyPI API Query**: Queries the official PyPI database (`https://pypi.org/pypi/joy-markdown-studio/json`) in the background on startup, utilizing a 2-second timeout to check for the latest package version without blocking the application startup or UI responsiveness.
+* **Intelligent Version Comparator**: Compares local and remote version strings as semantic version tuples to trigger upgrade alerts only when a newer version is officially released on PyPI.
+* **Premium Glassmorphism Upgrade Modal**: Greets the user 1.8 seconds after the splash screen fades out with a modern blur-effect modal showing current/latest versions, one-click `pip` command clipboard copying, and GitHub official link redirect.
 
 ---
 
