@@ -862,7 +862,9 @@
                 <div style="display: flex; flex-direction: column; gap: 8px; flex: 1; overflow: hidden; margin-top: 8px; border-top: 1px dashed var(--border); padding-top: 16px;">
                     <div style="font-size: 0.85em; font-weight: 600; color: var(--text-main); display: flex; justify-content: space-between; align-items: center;">
                         <span id="filtered-tags-title" data-i18n="tags_filtered_files">태그별 파일 목록</span>
-                        <button class="icon-btn-sm" id="clear-tag-filter-btn" onclick="clearTagFilter()" style="display: none; padding: 2px 6px; font-size: 0.72em; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 4px; color: var(--accent); cursor: pointer;" data-i18n="tags_clear_filter">필터 초기화</button>
+                        <button class="icon-btn-sm" id="clear-tag-filter-btn" onclick="clearTagFilter()" style="display: none; padding: 4px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 4px; color: var(--accent); cursor: pointer; align-items: center; justify-content: center; transition: all 0.2s;" data-i18n-title="tags_clear_filter" title="필터 초기화">
+                            <i data-lucide="rotate-ccw" style="width: 14px; height: 14px;"></i>
+                        </button>
                     </div>
                     <div id="filtered-files-container" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 2px; scrollbar-width: thin;">
                         <!-- 필터링된 파일 목록이 추가될 영역 -->

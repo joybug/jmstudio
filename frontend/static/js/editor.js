@@ -3717,7 +3717,7 @@ function renderFilteredFiles(tagsMap) {
         return;
     }
     
-    if (clearBtn) clearBtn.style.display = 'inline-block';
+    if (clearBtn) clearBtn.style.display = 'inline-flex';
     if (titleEl) titleEl.innerText = `${t('tags_filtered_files')} (#${activeTagFilter})`;
     
     const files = tagsMap[activeTagFilter] || [];
