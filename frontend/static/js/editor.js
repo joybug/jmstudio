@@ -233,6 +233,13 @@ class UndoManager {
                 window.renderTemplates();
             }
             
+            // 수식 카테고리 셀렉트 다국어 업데이트
+            const activeSubtab = document.querySelector('.math-subtab-btn.active');
+            if (activeSubtab && typeof updateMathCategorySelect === 'function') {
+                const subtabId = activeSubtab.id.replace('subtab-math-', '');
+                updateMathCategorySelect(subtabId);
+            }
+            
             if (window.pywebview && saveConfig) {
                 pywebview.api.save_lang(lang);
             }
@@ -1778,59 +1785,64 @@ class UndoManager {
 
         const MATH_SUBTAB_CATEGORIES = {
             math: [
-                { value: 'basic', label: '기본 수식' },
-                { value: 'calculus', label: '미적분 및 극한' },
-                { value: 'greek', label: '그리스 문자' },
-                { value: 'symbols', label: '기본 수학 기호' },
-                { value: 'spec_operators', label: '전문 수학 연산자' },
-                { value: 'set_logic', label: '집합론 및 논리' },
-                { value: 'lin_alg', label: '선형대수 및 행렬' }
+                { value: 'basic', labelKey: 'math_title_basic', label: '기본 수식' },
+                { value: 'calculus', labelKey: 'math_title_calculus', label: '미적분 및 극한' },
+                { value: 'greek', labelKey: 'math_title_greek', label: '그리스 문자' },
+                { value: 'symbols', labelKey: 'math_title_symbols', label: '기본 수학 기호' },
+                { value: 'spec_operators', labelKey: 'math_title_spec_operators', label: '전문 수학 연산자' },
+                { value: 'set_logic', labelKey: 'math_title_set_logic', label: '집합론 및 논리' },
+                { value: 'lin_alg', labelKey: 'math_title_lin_alg', label: '선형대수 및 행렬' }
             ],
             physics: [
-                { value: 'phys_ops', label: '기본 연산자' },
-                { value: 'em_gravity', label: '전자기학 및 중력' },
-                { value: 'quantum', label: '양자 및 상대성' },
-                { value: 'fluid', label: '유체역학' },
-                { value: 'thermo', label: '열역학' }
+                { value: 'phys_ops', labelKey: 'math_title_physics_ops', label: '기본 연산자' },
+                { value: 'em_gravity', labelKey: 'math_title_em_gravity', label: '전자기학 및 중력' },
+                { value: 'quantum', labelKey: 'math_title_quantum', label: '양자 및 상대성' },
+                { value: 'fluid', labelKey: 'math_title_fluid', label: '유체역학' },
+                { value: 'thermo', labelKey: 'math_title_thermo', label: '열역학' }
             ],
             bio: [
-                { value: 'rxn', label: '화학 반응 및 평형' },
-                { value: 'genetics', label: '유전학 및 집단유전학' },
-                { value: 'molbio', label: '분자생물학' },
-                { value: 'protein', label: '단백질 및 생화학' }
+                { value: 'rxn', labelKey: 'math_title_rxn', label: '화학 반응 및 평형' },
+                { value: 'genetics', labelKey: 'math_title_genetics', label: '유전학 및 집단유전학' },
+                { value: 'molbio', labelKey: 'math_title_molbio', label: '분자생물학' },
+                { value: 'protein', labelKey: 'math_title_biochem', label: '단백질 및 생화학' }
             ],
             cs: [
-                { value: 'cs_ops', label: '자주 쓰이는 연산자' },
-                { value: 'algo_cs', label: '알고리즘 & 컴퓨터 과학' },
-                { value: 'ml_ai', label: '머신러닝 & AI' },
-                { value: 'deep_learning', label: '딥러닝' },
-                { value: 'info_theory', label: '정보이론' },
-                { value: 'comp_arch', label: '컴퓨터 구조' },
-                { value: 'crypto', label: '암호학' },
-                { value: 'hash_integrity', label: '해시 함수 & 무결성' },
-                { value: 'net_security', label: '네트워크 보안' },
-                { value: 'info_security', label: '정보이론 기반' }
+                { value: 'cs_ops', labelKey: 'math_title_cs_ops', label: '자주 쓰이는 연산자' },
+                { value: 'algo_cs', labelKey: 'math_title_algo_cs', label: '알고리즘 & 컴퓨터 과학' },
+                { value: 'ml_ai', labelKey: 'math_title_ml_ai', label: '머신러닝 & AI' },
+                { value: 'deep_learning', labelKey: 'math_title_deep_learning', label: '딥러닝' },
+                { value: 'info_theory', labelKey: 'math_title_info_theory', label: '정보이론' },
+                { value: 'comp_arch', labelKey: 'math_title_comp_arch', label: '컴퓨터 구조' },
+                { value: 'crypto', labelKey: 'math_title_crypto', label: '암호학' },
+                { value: 'hash_integrity', labelKey: 'math_title_hash_integrity', label: '해시 함수 & 무결성' },
+                { value: 'net_security', labelKey: 'math_title_net_security', label: '네트워크 보안' },
+                { value: 'info_security', labelKey: 'math_title_info_security', label: '정보이론 기반' }
             ],
             ee: [
-                { value: 'ee_ops', label: '자주 쓰이는 연산자' },
-                { value: 'ee_circuits', label: '회로 이론' },
-                { value: 'ee_em', label: '전자기학' },
-                { value: 'ee_signals', label: '신호 및 시스템' },
-                { value: 'ee_semicon', label: '반도체 물리' },
-                { value: 'ee_control', label: '제어공학' }
+                { value: 'ee_ops', labelKey: 'math_title_ee_ops', label: '자주 쓰이는 연산자' },
+                { value: 'ee_circuits', labelKey: 'math_title_ee_circuits', label: '회로 이론' },
+                { value: 'ee_em', labelKey: 'math_title_ee_em', label: '전자기학' },
+                { value: 'ee_signals', labelKey: 'math_title_ee_signals', label: '신호 및 시스템' },
+                { value: 'ee_semicon', labelKey: 'math_title_ee_semicon', label: '반도체 물리' },
+                { value: 'ee_control', labelKey: 'math_title_ee_control', label: '제어공학' }
             ]
         };
 
         function updateMathCategorySelect(subtab) {
             const selectEl = document.getElementById('math-category-select');
             if (!selectEl) return;
-            selectEl.innerHTML = '<option value="all">전체</option>';
+            const allText = (translations[currentLang] && translations[currentLang]['lbl_all']) || '전체';
+            selectEl.innerHTML = `<option value="all">${allText}</option>`;
             const categories = MATH_SUBTAB_CATEGORIES[subtab];
             if (categories) {
                 categories.forEach(cat => {
                     const opt = document.createElement('option');
                     opt.value = cat.value;
-                    opt.textContent = cat.label;
+                    let text = cat.label;
+                    if (cat.labelKey && translations[currentLang] && translations[currentLang][cat.labelKey]) {
+                        text = translations[currentLang][cat.labelKey];
+                    }
+                    opt.textContent = text;
                     selectEl.appendChild(opt);
                 });
             }
