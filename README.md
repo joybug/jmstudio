@@ -1,4 +1,4 @@
-# 🧪 Joy Markdown Studio v3.9.11 🌟
+# 🧪 Joy Markdown Studio v3.9.12 🌟
 
 > **The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio**  
 > A premium desktop markdown creator application crafted with Python (`PyWebView` + `Bottle`) and modern Vanilla CSS/JS.
